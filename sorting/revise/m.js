@@ -4,29 +4,21 @@
  * The function accepts an integer array as parameter.
  */
 
-function merge_sort(arr) {
-  // Write your code here
-  return _merge_sort(arr, 0, arr.length - 1);
-}
-
-function _merge_sort(arr, start, end) {
+function merge_sort(arr, start = 0, end = arr.length - 1) {
   if (end <= start) {
     return arr;
   }
-  // Write your code here
+
   const mid = Math.floor((start + end) / 2);
-  _merge_sort(arr, start, mid);
-  _merge_sort(arr, mid + 1, end);
-  merge(arr, start, mid, end);
-  //   console.log(arr);
-  return arr;
+  merge_sort(arr, start, mid);
+  merge_sort(arr, mid + 1, end);
+  return merge(arr, start, mid, end);
 }
 
 function merge(arr, start, mid, end) {
   let i = start;
   let j = mid + 1;
   const aux = [];
-
   while (i <= mid && j <= end) {
     if (arr[i] <= arr[j]) {
       aux.push(arr[i]);
@@ -46,11 +38,11 @@ function merge(arr, start, mid, end) {
     aux.push(arr[j]);
     j++;
   }
-  
-  let c = start;
+
+  let k = start;
   for (const val of aux) {
-    arr[c] = val;
-    c++;
+    arr[k] = val;
+    k++;
   }
 
   return arr;
