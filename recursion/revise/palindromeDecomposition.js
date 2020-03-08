@@ -1,25 +1,28 @@
 function generate_palindromic_decompositions(s) {
   const result = [];
-  all_subStringsHelper(s.split(""), result, 0);
-  return result.join("|");
+  all_subStringsHelper(s.split(""), [], result);
+  return result;
 }
 
 function all_subStringsHelper(strArr, path, result) {
   const len = strArr.length;
-  if (len === 0) {
-    return;
-  }
 
-  if (len === 1) {
+  if (len <= 1) {
     path.push(strArr.join(""));
+    result.push(path.filter(v => !!v).join("|"));
+    path.pop();
     return;
   }
 
-  for (let i = 1; i < strArr.length; i++) {
-    if (isPalindrome(strArr.slice(0, i))) {
-      path.push(strArr.join(""));
+  for (let i = 1; i <= len; i++) {
+    const prefix = strArr.slice(0, i);
+    const leftArr = strArr.slice(i);
+    // console.log(prefix, leftArr);
+    if (isPalindrome(prefix)) {
+      path.push(prefix.join(""));
+      all_subStringsHelper(leftArr, path, result);
+      path.pop();
     }
-    all_subStringsHelper(strArr.slice(i));
   }
 }
 
@@ -34,4 +37,4 @@ function isPalindrome(strArr) {
   return true;
 }
 
-console.log(isPalindrome(["a"]));
+console.log(generate_palindromic_decompositions("aabbaa"));

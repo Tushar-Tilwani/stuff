@@ -19,7 +19,6 @@ function eliminateInlineStyle() {
     const className = `class${i}`;
     style.node.removeAttribute("style");
     style.node.setAttribute("class", className);
-    console.log(styleHTMLNode);
     const currentCSS = styleHTMLNode.innerText;
     styleHTMLNode.innerText = `${currentCSS} .${className}{${style.styles.join(
       ";"
