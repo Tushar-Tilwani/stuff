@@ -15,10 +15,9 @@ var lengthOfLongestSubstringTwoDistinct = function(s) {
 
   while (right <= strArr.length) {
     if (map.size <= K) {
-      //   console.log(map, left, right);
       const [start, end] = result;
 
-      if (end - start < right - left && map.size === K) {
+      if (end - start < right - left) {
         result = [left, right];
       }
       map.set(strArr[right], map.get(strArr[right]) + 1 || 1);

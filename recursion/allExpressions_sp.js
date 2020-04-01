@@ -1,48 +1,116 @@
 /*
  * Complete the function below.
  */
+
+const OPS = {
+  JOIN: "J",
+  PLUS: "+",
+  MULTIPLY: "*"
+};
 function generate_all_expressions(s, target) {
   const result = [];
-  const digits = s.split("");
-  const operators = ["+", "*"];
-  generate_all_expressions_helper(digits, operators, 0, [], result);
-  return evaluateExpression(result, target);
+  const digits = s.split("").map(d => parseInt(d));
+  const operators = [OPS.PLUS, OPS.MULTIPLY, OPS.JOIN];
+  helper(digits, 0, operators, [], digits[0], result, target, null, null);
+  return result;
 }
 
-function generate_all_expressions_helper(
+function helper(
   digits,
+  digitIndex,
   operators,
-  startIndex,
-  slate,
-  result
+  path,
+  partialTarget,
+  result,
+  target,
+  prevValue,
+  prevOp
 ) {
-  if (startIndex === digits.length - 1) {
-    result.push([...slate, digits[startIndex]]);
+  const currentValue = digits[digitIndex];
+  const currentOp = path[path.length - 1];
+  path.push(currentValue);
+
+  if (currentOp) {
+    [partialTarget, prevValue, prevOp] = h(
+      partialTarget,
+      currentValue,
+      prevValue,
+      currentOp,
+      prevOp
+    );
+  }
+
+  console.log(
+    prevValue,
+    prevOp,
+    path.filter(v => v !== OPS.JOIN).join(""),
+    partialTarget
+  );
+
+  if (digitIndex === digits.length - 1) {
+    if (partialTarget === target) {
+      result.push(path.filter(v => v !== OPS.JOIN).join(""));
+    }
+
+    path.pop();
     return;
   }
-  for (const operator of operators) {
-    slate.push(digits[startIndex]);
-    slate.push(operator);
-    generate_all_expressions_helper(
+
+  for (const op of operators) {
+    path.push(op);
+    helper(
       digits,
+      digitIndex + 1,
       operators,
-      startIndex + 1,
-      slate,
-      result
+      path,
+      partialTarget,
+      result,
+      target,
+      prevValue
     );
-    slate.pop();
-    slate.pop();
+    path.pop();
   }
+  path.pop();
 }
 
-function evaluateExpression(expressions, target) {
-  return expressions.reduce((acc, exp) => {
-    const strExp = exp.join('');
-    if (eval(strExp) === target) {
-      acc.push(strExp);
+function h(partialTarget, currentValue, prevValue, currentOp, prevOp) {
+  if (currentOp === OPS.JOIN) {
+    if (prevOp === OPS.PLUS) {
+      partialTarget = partialTarget - prevValue;
+      currentValue = joinOP(prevValue, currentValue);
+
+      /* BODMAS is complicated */
+      currentOp = prevOp;
+
+      partialTarget = partialTarget + currentValue;
+    } else if (prevOp === OPS.MULTIPLY) {
+      partialTarget = partialTarget / prevValue;
+      currentValue = joinOP(prevValue, currentValue);
+
+      /* BODMAS is complicated */
+      currentOp = prevOp;
+
+      partialTarget = partialTarget * currentValue;
+    } else {
+      partialTarget = joinOP(partialTarget, currentValue);
     }
-    return acc;
-  }, []);
+  } else if (currentOp === OPS.MULTIPLY) {
+    if (prevOp === OPS.PLUS) {
+      partialTarget = partialTarget - prevValue;
+      partialTarget = partialTarget + prevValue * currentValue;
+      /* BODMAS is complicated */
+      currentOp = prevOp;
+    } else {
+      partialTarget = partialTarget * currentValue;
+    }
+  } else {
+    partialTarget = partialTarget + currentValue;
+  }
+  return [partialTarget, currentValue, currentOp];
+}
+function joinOP(a, b) {
+  return 10 * a + b;
 }
 
-console.log(generate_all_expressions("123", -4));
+// console.log(joinOP(4, 2))
+console.log(generate_all_expressions("2222", 26));

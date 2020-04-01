@@ -1,12 +1,7 @@
 /*
  * Complete the join_words_to_make_a_palindrome function below.
- * https://leetcode.com/problems/palindrome-pairs/
  */
-function palindromePairs(words) {
-  const indexMap = words.reduce((acc, word, index) => {
-    acc[word] = index;
-    return acc;
-  }, {});
+function join_words_to_make_a_palindrome(words) {
   /*
    * Write your code here.
    */
@@ -43,10 +38,8 @@ function palindromePairs(words) {
     return ["NOTFOUND", "DNUOFTON"];
   }
 
-  const answer = Array.from(result.values())
-    .map(str => str.split(","))
-    .map(([word1, word2]) => [indexMap[word1], indexMap[word2]]);
-  return answer;
+  const answer = Array.from(result.values()).map(str => str.split(","));
+  return answer[1] || answer[0];
 }
 
 const END_CHAR = "$";
@@ -67,7 +60,7 @@ class Trie {
     }
   }
 
-  addWord(word, endChar) {
+  addWord(word) {
     const chars = word.split("");
     let node = this.root;
     for (const char of chars) {
@@ -85,7 +78,11 @@ class Trie {
     for (const word of this.words) {
       const foundResult = dfsLeftOver(this.root, 0, word.split("").reverse());
       if (foundResult !== null) {
-        result.push([foundResult, word]);
+        if (foundResult.length === word.length) {
+          result.push([foundResult, word].sort());
+        } else {
+          result.push([foundResult, word]);
+        }
       }
     }
     return result;

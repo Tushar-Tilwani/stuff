@@ -2,21 +2,18 @@
  * Complete the neuronyms function below.
  */
 function neuronyms(word) {
-  if (word.length < 4) {
-    return [];
-  }
-  /*
-   * Write your code here.
-   */
   const result = [];
-  let len = word.length;
-  const max = len - 3;
-  for (let i = 0; i < max; i++) {
-    // IT TOOK ME MORE THAN 30 MINUTES TO COME UP WITH max-i huh!!!
-    for (let j = 0; j < max - i; j++) {
-      result.push(
-        `${word.slice(0, j + 1)}${i + 2}${word.slice(max + i + j, len)}`
-      );
+  const len = word.length;
+  if (len < 4) {
+    return result;
+  }
+  for (let i = 1; i <= len - 2; i++) {
+    const prefix = word.slice(0, i);
+    const leftChars = len - (i + 2);
+    for (let j = 1; j <= leftChars; j++) {
+      const suffix = word.slice(len - j, len);
+      const removedChars = len - i - j;
+      result.push(prefix + removedChars + suffix);
     }
   }
   return result;
@@ -25,4 +22,4 @@ function neuronyms(word) {
 // ["n4d", "na3d", "n3ed", "n2led", "na2ed", "nai2d"]
 // [ 'n4d', 'na3d', 'n3ed', 'nai2d', 'n2led' ]
 
-console.log(neuronyms("abcd"));
+console.log(neuronyms("nailed"));
