@@ -1,4 +1,10 @@
-function boggle_solver(dictionary, mat) {
+/**
+ * @param {character[][]} board
+ * @param {string[]} words
+ * @return {string[]}
+ */
+
+function findWords(mat, dictionary) {
   // Write your code here
   const trie = new Trie(dictionary);
   const result = [];
@@ -9,7 +15,7 @@ function boggle_solver(dictionary, mat) {
     for (let j = 0; j < MAX_COL; j++) {
       const visited = getVisited(mat);
       visited[i][j] = true;
-      dfs(mat, i, j, trie.rootNode, [], getVisited(mat), trie, result);
+      dfs(mat, i, j, trie.rootNode, [], visited, trie, result);
     }
   }
 
@@ -17,7 +23,7 @@ function boggle_solver(dictionary, mat) {
 }
 function dfs(mat, row, col, trieNode, path, visited, trie, result) {
   const char = mat[row][col];
-  if (!trieNode.children || !trieNode.children.has(char)) {
+  if (!trieNode.children.has(char)) {
     return;
   }
 
@@ -111,45 +117,6 @@ function recursiveDelete(node) {
   delete node.children;
 }
 
-function getNeighbours(mat, row, col) {
-  const MAX_ROW = mat.length;
-  const MAX_COL = mat[0].length;
-  const result = [];
-
-  if (col - 1 >= 0) {
-    if (row + 1 < MAX_ROW) {
-      result.push([row + 1, col - 1]);
-    }
-
-    result.push([row, col - 1]);
-
-    if (row - 1 >= 0) {
-      result.push([row - 1, col - 1]);
-    }
-  }
-
-  if (row + 1 < MAX_ROW) {
-    result.push([row + 1, col]);
-  }
-
-  if (row - 1 >= 0) {
-    result.push([row - 1, col]);
-  }
-
-  if (col + 1 < MAX_COL) {
-    if (row + 1 < MAX_ROW) {
-      result.push([row + 1, col + 1]);
-    }
-
-    result.push([row, col + 1]);
-
-    if (row - 1 >= 0) {
-      result.push([row - 1, col + 1]);
-    }
-  }
-  return result;
-}
-
 function getVisited(mat) {
   const MAX_ROW = mat.length;
   const MAX_COL = mat[0].length;
@@ -164,17 +131,16 @@ function getVisited(mat) {
   return visited;
 }
 
-var mat = ["bsh", "tee", "arh"];
-var dict = ["bst", "heap", "tree"];
+function getNeighbours(mat, row, col) {
+  const maxRow = mat.length;
+  const maxCol = mat[0].length;
+  const result = [];
 
-// dict = ["hat", "world"];
-// mat = ["aaa", "hat", "ccc"];
+  col - 1 >= 0 && result.push([row, col - 1]);
+  col + 1 < maxCol && result.push([row, col + 1]);
 
-// dict = ["bsg", "bstaaaa", "bssg"];
+  row - 1 >= 0 && result.push([row - 1, col]);
+  row + 1 < maxRow && result.push([row + 1, col]);
 
-// dict = ["abc", "dfg", "lmn"];
-// const trie = new Trie(dict);
-
-console.log(boggle_solver(dict, mat));
-
-// console.log(trie.removeWord("abc"), trie.rootNode);
+  return result;
+}
