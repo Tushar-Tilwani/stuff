@@ -1,0 +1,238 @@
+
+
+https://www.geeksforgeeks.org/rearrange-a-string-so-that-all-same-characters-become-at-least-d-distance-away/
+
+Rearrange a string so that all same characters become d distance away
+
+Given a string and a positive integer d. Some characters may be repeated in the given string. Rearrange characters of the given string such that the same characters become d distance away from each other. Note that there can be many possible rearrangements, the output should be one of the possible rearrangements. If no such arrangement is possible, that should also be reported.
+Expected time complexity is O(n^2) where n is length of input string.
+
+Examples:
+Input:  "abb", d = 2
+Output: "bab"
+
+Input:  "aacbbc", d = 3
+Output: "abcabc"
+
+Input: "geeksforgeeks", d = 3
+Output: egkegkesfesor
+
+Input:  "aaa",  d = 2
+Output: Cannot be rearranged
+
+void rearrange(char str[], int d) {
+    // write your code here
+    
+}
+
+['a', , ,'a']
+
+// a,b,a
+// []
+// aacbbcld d=3
+// a:2,b:2,c:2,l:1: d:1
+// [null,null,....]
+// 'a,b,c,a,b,c,l,d'
+// 
+function rearrange(strArr, d){
+   const freqMap = new Map();
+    
+    
+    for(const char of strArr){
+    if(freqMap.has(char)){
+      freqMap.set(char, freqMap.get(char) + 1);
+    } else {
+        freqMap.set(char, 1);
+    }
+    }
+    
+    const values = freqMap.values();
+    // [[char, freq],]
+    const maxHeap = new Heap(freqMap.values(), function(value1, value2){
+        return value2[1] > value1[1];
+    });
+    
+    const [,maxFreq] = maxHeap.peekTop();
+    /*if(maxFreq > (strArr.length/d+1)){
+    return false;
+    }*/
+    
+    let c = 0;
+    
+    cleanStrArr(strArr);
+    
+    while(maxHeap.size > 0){
+        let i = getFirstEmptySlot(strArr, c);
+        c=i;
+        
+        // Top frequent element
+        let [char, freq] = maxHeap.extractTop();
+        while(freq > 0){
+            strArr[i]=char;
+            i += d;
+            if (i>=strArr.length){
+            return 'Cannot be rearranged';
+            }
+        }
+        
+        c += 1;
+    }
+}
+
+// a,b,c,a,b,c,a,l,,,l,
+// c=1
+
+function cleanStrArr(strArr){
+    for(let i=0;i<strArr.length;i++){
+        strArr[i] = null;
+     }
+}
+
+function getFirstEmptySlot(strArr, startIndex){
+ for(let i=startIndex;i<strArr.length;i++){
+        if(strArr[i] == null){
+        return i;
+        }
+     }
+}
+
+a,b,c,a,b,,
+[0,0,0]
+[3,3,2]
+
+a, ,a ,a
+
+a,b,c,a,b,l,a,
+
+0,1,2,3,4,5,6    
+l
+'a,b,c,a,b,l'
+'a,b,c,a,b,c,l, '
+
+
+// aacbbc
+// a: 1
+// b: 2
+// c: 2
+
+// a:4, b:1, c:1
+// Compare frequences, if are frequencues are equal, compare the ascii value of the char
+
+//a,
+
+// [a,b,c]
+// 
+
+// [a,b,c,a,b,c,a,b,c]
+
+// [a,d,a,v,a,d,a,]
+
+/*
+
+given an array: 
+
+[
+    {value: 'green', delay: 3000, fn: func,},
+    {value: 'red', delay: 2000, fn: func,},
+    {value: 'yellow', delay: 1000, fn: func,},
+    {value: 'white', delay: 5000, fn: func,},
+    ...
+]
+
+ouput: 
+
+after 3 sec, print green
+after another 2 sec, print red
+after another 1 sec, print yellow
+after another 5 sec, print white
+
+*/
+
+ function delayPrint(arr){
+    let totalDelay = 0;
+    arr.forEach(({value, delay, fn}) => {
+        waitAndReturn(delay);
+        console.log(value);
+        fn();
+    });
+}
+
+
+/*
+async function delayPrintValue({value, delay, fn}){
+    console.log(val);
+    await fn();
+}
+*/
+
+
+
+const arr = [
+    {value: 'green', delay: 3000, fn: () => waitAndReturn(200)},
+    {value: 'red', delay: 2000, fn: () => waitAndReturn(400)},
+    {value: 'yellow', delay: 1000, fn: () => waitAndReturn(300)},
+    {value: 'white', delay: 5000, fn: () => waitAndReturn(100)},
+]
+
+// delayPrint(arr)
+
+
+/*
+ function 
+    wait for 2 sec, then return 'after wait'
+ 
+ new Date().getTime()
+ // delayTime ms
+*/
+
+function waitAndReturn(){
+    const time = new Date().getTime();
+    const delay = 2000 * Math.random();
+    
+    console.log('before wait for ' + delay);
+    
+    while(true){
+        const now = new Date().getTime();
+        if(now - time > delay){
+            break;
+        }
+    }
+    
+    console.log('after wait for ' + delay);
+}
+
+/*
+
+timer.   0fn()     1,fn().      2, fn().      3, fn()
+
+fn() {
+  waitAndReturn();
+}
+
+*/
+
+
+function intervalRun(fn, time = 1000) {
+    let isRunning = false;
+    
+    return setInterval(() => {
+        if(!isRunning){
+            
+            isRunning = true;
+          
+             fn();
+        
+            isRunning = false;
+        }
+    }, time);
+}
+
+
+clock.     0.      1,      2,     3,
+           FN ---------1.5
+interval   fn     fn     fn    fn
+
+
+
+
+
