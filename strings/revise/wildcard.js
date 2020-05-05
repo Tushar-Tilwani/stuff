@@ -6,7 +6,7 @@
  */
 const isMatch = function(s, p) {
   const trie = new Trie(["car", "ca", "cat", "ccvv", "dog"]);
-  return trie.findWords("c");
+  return trie.wildCardSearch("c?t");
 };
 
 const END_CHAR = "$";
@@ -49,7 +49,71 @@ class Trie {
     return this.dfs(node, prefixChars, [], []);
   }
 
-  dfs(node, prefix, path, result) {
+  wildCardSearch(prefix) {
+    return removeDuplicates(this._wildCardSearch(prefix));
+  }
+
+  _wildCardSearch(
+    prefix,
+    node = this.rootNode,
+    path = [],
+    prefixIndex = 0,
+    result = []
+  ) {
+    const prefixChar = prefix[prefixIndex];
+    if (prefixIndex === prefix.length) {
+      if (node.children.has(END_CHAR)) {
+        result.push(path.join(""));
+      }
+      return result;
+    }
+
+    if (node.char === END_CHAR) {
+      return;
+    }
+
+    if (prefixChar === "*") {
+      // No Value
+      this._wildCardSearch(prefix, node, path, prefixIndex + 1, result);
+      // All Values
+      for (const child of node.children.values()) {
+        if (child.char === END_CHAR) {
+          continue;
+        }
+        path.push(child.char);
+        this._wildCardSearch(prefix, child, path, prefixIndex, result);
+        path.pop();
+      }
+      return result;
+    }
+
+    if (prefixChar === "?") {
+      for (const child of node.children.values()) {
+        if (child.char === END_CHAR) {
+          continue;
+        }
+        path.push(child.char);
+        this._wildCardSearch(prefix, child, path, prefixIndex + 1, result);
+        path.pop();
+      }
+      return result;
+    }
+
+    if (node.children.has(prefixChar)) {
+      path.push(prefixChar);
+      this._wildCardSearch(
+        prefix,
+        node.children.get(prefixChar),
+        path,
+        prefixIndex + 1,
+        result
+      );
+      path.pop();
+    }
+    return result;
+  }
+
+  dfs(node, prefix, path = [], result = []) {
     if (node.children.has(END_CHAR)) {
       result.push([...prefix, ...path].join(""));
     }
@@ -63,6 +127,10 @@ class Trie {
     }
     return result;
   }
+}
+
+function removeDuplicates(result) {
+  return Array.from(new Set(result));
 }
 
 console.log(isMatch());
