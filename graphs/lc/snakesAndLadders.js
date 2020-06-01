@@ -5,14 +5,35 @@
  * @return {number}
  */
 var snakesAndLadders = function(board) {
-  const startNode = board[board.length - 1][0];
-  const endNode = board[0][0];
-  const numericalVal = [];
+  const NUM_OF_NODES = board.length * board[0].length;
+  const start = 0;
+  const end = NUM_OF_NODES - 1;
+  // Mapping is from 0 to NUM_OF_NODES - 1
+  const nodeMapping = getNodeMapping(board);
+  const visited = new Array(NUM_OF_NODES).fill(false);
+  return bfs(start, end, board, nodeMapping, visited);
 };
 
-function bfs() {}
+function bfs(start, end, board, nodeMapping, visited) {
+  const QUEUE = [{ node: start, level: 0 }];
+  visited[start] = true;
+  while (QUEUE.length > 0) {
+    const { node, level } = QUEUE.shift();
+    if (node === end) {
+      return level + 1;
+    }
+    const neighbors = getNeighbors(board, nodeMapping, node);
+    for (const neighbor of neighbors) {
+      if (!visited[neighbor]) {
+        QUEUE.push({ node: neighbor, level: level + 1 });
+        visited[neighbor] = true;
+      }
+    }
+  }
+  return -1;
+}
 
-function getNodeList(board) {
+function getNodeMapping(board) {
   const result = [];
   const MAX_COL = board[0].length - 1;
   let isRight = true;
@@ -34,31 +55,18 @@ function getNodeList(board) {
   return result;
 }
 
-function getNeighbors1(board, sRow, sCol) {
+function getNeighbors(board, nodeMapping, start) {
   const result = [];
-  const MAX_COL = board[0].length - 1;
-  let isRight = true;
-  let inc = isRight ? 1 : -1;
-  let row = sRow;
-  let col = sCol;
-  let counter = 0;
-
-  while (counter < 6) {
-    col += inc;
-
-    if (col > MAX_COL || col < 0) {
-      row -= 1;
-      if (row < 0) {
-        break;
-      }
-      isRight = !isRight;
-      col = isRight ? 0 : MAX_COL;
-      inc = isRight ? 1 : -1;
+  for (let i = 1; i <= 6; i++) {
+    const neighbor = start + i;
+    if (neighbor >= nodeMapping.length) {
+      break;
     }
-    result.push([row, col]);
-    counter++;
+    const [row, col] = nodeMapping[neighbor];
+    const val = board[row][col];
+    // Mapping is from 0 to NUM_OF_NODES - 1
+    val === -1 ? result.push(neighbor) : result.push(val - 1);
   }
-
   return result;
 }
 
@@ -71,5 +79,6 @@ let board = [
   [-1, 15, -1, -1, -1, -1]
 ];
 
-// console.log(getNeighbors(board, 1, 3));
-console.log(getNodeList(board), board.length * board[0].length);
+//console.log(getNeighbors(board, getNodeMapping(board), 0));
+console.log(snakesAndLadders(board));
+// console.log(getNodeList(board), board.length * board[0].length);
