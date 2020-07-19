@@ -41,8 +41,12 @@ var copyRandomList = function(head) {
   while (node) {
     const cloneNode = node.next;
     cloneNode.random = node.random.next;
+    
     cloneNode.next = cloneNode.next.next;
-    node = node.next.next;
+
+    node.next = node.next.next;
+
+    node = node.next;
   }
 
   return newHead;

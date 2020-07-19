@@ -20,32 +20,21 @@ var copyRandomList = function(head) {
   const nodeMap = new Map();
 
   let node = head;
-  // let newNode = new Node(head.val);
-  let newPrev = null;
-  let newHead = null;
 
   // First map normal clone link list without any random links
   while (node) {
     const newNode = new Node(node.val);
     nodeMap.set(node, newNode);
-
-    if (newPrev === null) {
-      newPrev.next = newNode;
-    } else {
-      newHead = newNode;
-    }
-
     node = node.next;
-    newPrev = newNode;
   }
 
   node = head;
   while (node) {
-    const cloneNode = linkMap.get(node);
-    cloneNode.random = linkMap.get(node.random) || null;
-    // cloneNode.next = linkMap.get(node.next) || null;
+    const cloneNode = nodeMap.get(node);
+    cloneNode.random = nodeMap.get(node.random) || null;
+    cloneNode.next = nodeMap.get(node.next) || null;
     node = node.next;
   }
 
-  return newHead;
+  return nodeMap.get(head);
 };

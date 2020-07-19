@@ -16,6 +16,20 @@ class Heap {
     return this.arr[1];
   }
 
+  remove(val) {
+    const vals = [];
+    let top = this.extractTop();
+
+    while (top !== val && top !== null) {
+      vals.push(top);
+      top = this.extractTop();
+    }
+
+    while (vals.length > 0) {
+      this.add(vals.pop());
+    }
+  }
+
   bubbleUp() {
     let childIndex = this.arr.length - 1;
     let parentIndex;
@@ -93,75 +107,50 @@ class Heap {
 }
 
 /**
- * @param {number[][]} buildings
- * @return {number[][]}
+ * @param {number[]} nums
+ * @param {number} limit
+ * @return {number}
  */
-var getSkyline = function(buildings) {
-  const cords = [];
-  const heightMaxHeap = new Heap((a, b) => b < a);
-  heightMaxHeap.add(0);
+var longestSubarray = function(nums, limit) {
+  const maxHeap = new Heap((a, b) => a[0] > b[0]);
+  const minHeap = new Heap((a, b) => a[0] < b[0]);
 
-  for (const [x1, x2, y] of buildings) {
-    cords.push([x1, y, "s"]);
-    cords.push([x2, y, "e"]);
+  let result = [Infinity, -Infinity];
+
+  const nodes = [];
+  for (let i = 0; i < nums.length; i++) {
+    nodes.push([nums[i], i]);
   }
 
-  cords.sort(([x1, y1, pos1], [x2, y2, pos2]) => {
-    if (x1 === x2) {
-      if (pos1 === "s" && pos2 === "s") {
-        return y2 - y1;
-      }
+  for (const node of nodes) {
+    maxHeap.add(node);
+    minHeap.add(node);
+    result = getRes(maxHeap, minHeap, limit, result);
+  }
 
-      if (pos1 === "s" && pos2 === "e") {
-        return -1;
-      }
+  for (const node of nodes) {
+    maxHeap.remove(node);
+    minHeap.remove(node);
+    result = getRes(maxHeap, minHeap, limit, result);
+  }
 
-      if (pos1 === "e" && pos2 === "s") {
-        return 1;
-      }
+  console.log("result", result);
+  return result[1] - result[0] + 1;
+};
 
-      if (pos1 === "e" && pos2 === "e") {
-        return y1 - y2;
-      }
-    }
-    return x1 - x2;
-  });
-  //console.log(cords);
-
-  const result = [];
-
-  for (const [x, y, pos] of cords) {
-    const prevMax = heightMaxHeap.peekTop();
-    if (pos === "s") {
-      heightMaxHeap.add(y);
-    } else {
-      const temp = [];
-
-      while (y !== heightMaxHeap.peekTop()) {
-        temp.push(heightMaxHeap.extractTop());
-      }
-
-      heightMaxHeap.extractTop();
-
-      while (temp.length !== 0) {
-        heightMaxHeap.add(temp.pop());
-      }
-    }
-    const currentMax = heightMaxHeap.peekTop();
-
-    if (currentMax !== prevMax) {
-      result.push([x, currentMax]);
+function getRes(minHeap, maxHeap, limit, result) {
+  if (minHeap.peekTop() === null || maxHeap.peekTop() === null) {
+    return result;
+  }
+  const [minVal, minIndex] = minHeap.peekTop();
+  const [maxVal, maxIndex] = maxHeap.peekTop();
+  const diff = minVal - maxVal;
+  console.log(maxHeap.peekTop(), minHeap.peekTop(), diff);
+  if (diff <= limit) {
+    const [start, end] = result;
+    if (end - start < maxIndex - minIndex) {
+      return [minIndex, maxIndex];
     }
   }
   return result;
-};
-
-const cords = [
-  [2, 9, 10],
-  [3, 7, 15],
-  [5, 12, 12],
-  [15, 20, 10],
-  [19, 24, 8]
-];
-
-console.log(getSkyline(cords));
+}
