@@ -120,10 +120,9 @@ var longestSubarray = function(nums, limit) {
   let left = 0;
   let right = 0;
 
-  
-
   maxHeap.add(nums[right]);
   minHeap.add(nums[right]);
+  right++;
 
   while (right < nums.length) {
     if (maxHeap.peekTop() - minHeap.peekTop() < limit) {
@@ -131,6 +130,8 @@ var longestSubarray = function(nums, limit) {
       if (end - start < right - left) {
         result = [left, right];
       }
+      maxHeap.add(nums[right]);
+      minHeap.add(nums[right]);
       right++;
     } else {
       maxHeap.remove(nums[left]);
@@ -141,20 +142,3 @@ var longestSubarray = function(nums, limit) {
 
   return result[1] - result[0] + 1;
 };
-
-function getRes(minHeap, maxHeap, limit, result) {
-  if (minHeap.peekTop() === null || maxHeap.peekTop() === null) {
-    return result;
-  }
-  const [minVal, minIndex] = minHeap.peekTop();
-  const [maxVal, maxIndex] = maxHeap.peekTop();
-  const diff = minVal - maxVal;
-  console.log(maxHeap.peekTop(), minHeap.peekTop(), diff);
-  if (diff <= limit) {
-    const [start, end] = result;
-    if (end - start < maxIndex - minIndex) {
-      return [minIndex, maxIndex];
-    }
-  }
-  return result;
-}

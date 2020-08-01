@@ -116,10 +116,8 @@ var longestSubarray = function(nums, limit) {
   const minHeap = new Heap((a, b) => a < b);
 
   let result = 0;
-
   let left = 0;
   let right = 0;
-
   while (right < nums.length) {
     if (maxHeap.peekTop() === null) {
       maxHeap.add(nums[right]);
@@ -139,5 +137,5 @@ var longestSubarray = function(nums, limit) {
 
   console.log(result);
 
-  return result[1] - result[0] + 1;
+  return result;
 };
