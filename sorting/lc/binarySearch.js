@@ -3,7 +3,7 @@
  * @param {number} target
  * @return {boolean}
  */
-var searchMatrix = function(matrix, target) {
+var searchMatrix = function (matrix, target) {
   if (matrix.length === 0) {
     return false;
   }
@@ -83,3 +83,18 @@ function searchCol(matrix, start, end, target) {
 
 // [[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]]
 //23
+
+function leftMostBinarySearch(arr, target) {
+  let start = 0;
+  let end = arr.length - 1;
+
+  while (start <= end) {
+    let mid = Math.floor((start + end) / 2);
+    if (target <= arr[mid]) {
+      end = mid - 1;
+    } else {
+      start = mid + 1;
+    }
+  }
+  return start;
+}

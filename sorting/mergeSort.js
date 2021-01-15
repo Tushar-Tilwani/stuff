@@ -42,3 +42,4 @@ function merge(arr, start, mid, end) {
 }
 
 console.log(mergeSort([4, 3, 1, 9, 0, 2]));
+
