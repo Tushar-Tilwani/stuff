@@ -23,6 +23,6 @@ function _helper(n, source, dest, aux, result) {
   return result;
 }
 
-console.log(tower_of_hanoi(2));
+console.log(tower_of_hanoi(3));
 
 // console.log([ [1, 2], [1, 3], [2, 3], [1, 2], [3, 1], [3, 2], [1, 2], [1, 3], [2, 3], [2, 1], [3, 1], [2, 3], [1, 2], [1, 3], [2, 3] ].length)
