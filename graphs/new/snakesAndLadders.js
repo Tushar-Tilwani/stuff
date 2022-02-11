@@ -8,14 +8,14 @@ var snakesAndLadders = function (board) {
   const source = 1;
   const dest = n * n;
   const visited = new Array(dest + 1).fill(false);
-    // console.log(edgeList);
+  console.log(edgeList);
   return bfs(source, dest, edgeList, visited);
 };
 
 function bfs(source, dest, edgeList, visited) {
   const QUEUE = [[source, 0]];
   while (QUEUE.length > 0) {
-    // console.log(QUEUE);
+    console.log(QUEUE);
     const [node, level] = QUEUE.shift();
     if (node === dest) {
       return level;
@@ -23,19 +23,20 @@ function bfs(source, dest, edgeList, visited) {
     // console.log(node, edgeList.get(node));
     const neighbors = edgeList.get(node);
 
-    for (const neighbor of neighbors) {
-      if (visited[neighbor]) {
-        continue;
+    if (neighbors.length === 1) {
+      const neighbor = neighbors[0];
+      if (!visited[neighbor]) {
+        visited[neighbor] = true;
+        QUEUE.push([neighbor, level]);
       }
-
-      let newNeigbhor = neighbor;
-
-      while (edgeList.get(newNeigbhor).length === 1 && !visited[newNeigbhor]) {
-        visited[newNeigbhor] = true;
-        newNeigbhor = edgeList.get(newNeigbhor)[0];
+    } else {
+      for (const neighbor of neighbors) {
+        if (visited[neighbor]) {
+          continue;
+        }
+        visited[neighbor] = true;
+        QUEUE.push([neighbor, level + 1]);
       }
-      visited[newNeigbhor] = true;
-      QUEUE.push([newNeigbhor, level + 1]);
     }
   }
   return -1;
@@ -82,10 +83,10 @@ let board = [
   [-1, 15, -1, -1, -1, -1],
 ];
 
-// board = [
-//   [-1, -1],
-//   [-1, 3],
-// ];
+board = [
+  [-1, -1],
+  [-1, 3],
+];
 
 board = [
   [-1, 1, 2, -1],
