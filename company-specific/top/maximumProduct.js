@@ -1,3 +1,5 @@
+const MOD = Math.pow(10, 9) + 7;
+
 // Children of n => 2n , 2n+1
 // parent of n => Math.floor(n/2);
 class Heap {
@@ -84,19 +86,22 @@ class Heap {
   }
 }
 
-function randomInRange(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-const arr = [];
-const n = 6;
-for (let i = 0; i < n; i++) {
-  arr.push(randomInRange(1, 700));
-}
-const minHeap = new Heap(arr, (a, b) => b < a);
-console.log(minHeap);
-let sorted = [];
-for (let i = 0; i < n; i++) {
-  sorted.push(minHeap.extractTop());
-}
-console.log(sorted);
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
+ */
+var maximumProduct = function (nums, k) {
+  const minHeap = new Heap(nums, (a, b) => b < a);
+  for (let i = 0; i < k; i++) {
+    const top = minHeap.extractTop();
+    minHeap.push(top + 1);
+  }
+  let result = 1;
+  const numsArr = minHeap.arr;
+  for (const num of numsArr) {
+    result *= num ?? 1;
+    result = result % MOD;
+  }
+  return result % MOD;
+};

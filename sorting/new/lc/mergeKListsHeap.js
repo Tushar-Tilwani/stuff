@@ -83,20 +83,30 @@ class Heap {
     a[j] = temp;
   }
 }
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode[]} lists
+ * @return {ListNode}
+ */
+var mergeKLists = function (lists) {
+  const head = new ListNode();
+  const minHeap = new Heap([], (a, b) => a.val > b.val);
+  for (const list of lists) {
+    list && minHeap.push(list);
+  }
+  let current = head;
+  while (minHeap.size() > 0) {
+    const node = minHeap.extractTop();
+    node.next && minHeap.push(node.next);
+    current.next = node;
+    current = node;
+  }
 
-function randomInRange(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-const arr = [];
-const n = 6;
-for (let i = 0; i < n; i++) {
-  arr.push(randomInRange(1, 700));
-}
-const minHeap = new Heap(arr, (a, b) => b < a);
-console.log(minHeap);
-let sorted = [];
-for (let i = 0; i < n; i++) {
-  sorted.push(minHeap.extractTop());
-}
-console.log(sorted);
+  return head.next;
+};

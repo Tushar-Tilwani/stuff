@@ -84,19 +84,32 @@ class Heap {
   }
 }
 
-function randomInRange(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
+var FreqStack = function () {
+  this.maxHeap = new Heap([], (a, b) => {
+    if (a[1] === b[1]) return a[2] < b[2];
+    return a[1] < b[1];
+  });
+  this.freqMap = new Map();
+  this.current = 0;
+};
 
-const arr = [];
-const n = 6;
-for (let i = 0; i < n; i++) {
-  arr.push(randomInRange(1, 700));
-}
-const minHeap = new Heap(arr, (a, b) => b < a);
-console.log(minHeap);
-let sorted = [];
-for (let i = 0; i < n; i++) {
-  sorted.push(minHeap.extractTop());
-}
-console.log(sorted);
+/**
+ * @param {number} val
+ * @return {void}
+ */
+FreqStack.prototype.push = function (val) {
+  const freq = this.freqMap.get(val) ?? 0;
+  this.freqMap.set(val, freq + 1);
+  this.maxHeap.push([val, freq + 1, this.current]);
+  this.current += 1;
+};
+
+/**
+ * @return {number}
+ */
+FreqStack.prototype.pop = function () {
+  const [val, freq] = this.maxHeap.extractTop();
+  this.freqMap.set(val, freq - 1);
+  return val;
+};
+

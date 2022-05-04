@@ -1,3 +1,5 @@
+// https://leetcode.com/problems/rectangle-area-ii/
+
 // Children of n => 2n , 2n+1
 // parent of n => Math.floor(n/2);
 class Heap {
@@ -84,19 +86,17 @@ class Heap {
   }
 }
 
-function randomInRange(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-const arr = [];
-const n = 6;
-for (let i = 0; i < n; i++) {
-  arr.push(randomInRange(1, 700));
-}
-const minHeap = new Heap(arr, (a, b) => b < a);
-console.log(minHeap);
-let sorted = [];
-for (let i = 0; i < n; i++) {
-  sorted.push(minHeap.extractTop());
-}
-console.log(sorted);
+const MOD = Math.pow(10, 9) + 7;
+/**
+ * @param {number[][]} rectangles
+ * @return {number}
+ */
+var rectangleArea = function (rectangles) {
+  const heap = new Heap([], (a, b) => a[0] > b[0]);
+  for (const [x1, y1, x2, y2] of rectangles) {
+    const height = Math.abs(y2 - y1) % MOD;
+    
+  }
+  console.log(heap);
+  return 0;
+};
