@@ -1,0 +1,208 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Browser Output</title>
+    <style>
+      #board {
+        width: 280px;
+        min-height: 450px;
+        border-radius: 10%;
+        padding: 0 20px 20px 20px;
+        text-align: center;
+        background-color: grey;
+        color: white;
+      }
+
+      h1 {
+        padding-top: 12px;
+      }
+
+      h2 {
+        margin: 8px;
+      }
+
+      table {
+        margin: auto;
+        border-spacing: 8px;
+      }
+
+      button {
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        background-color: #6e072d;
+        border-color: #6e6e6e;
+        color: white;
+      }
+
+      .game-square {
+        font-size: 50px;
+        width: 70px;
+        height: 70px;
+        vertical-align: top;
+      }
+
+      .game-square:disabled {
+        cursor: default;
+      }
+
+      #restart-button {
+        display: none;
+        font-size: 24px;
+        padding: 12px;
+        margin: 12px auto;
+      }
+
+      body {
+        scrollbar-width: thin;
+        scrollbar-color: #bcd transparent;
+      }
+
+      body::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      body::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+
+      body::-webkit-scrollbar-thumb {
+        background: #bcd;
+        border-radius: 3px;
+      }
+
+      body::-webkit-scrollbar-corner {
+        background-color: transparent;
+      }
+    </style>
+
+    <script
+      src="data:text/javascript;charset=UTF-8;base64,Ly8gV3JpdGUgeW91ciBjb2RlIGhlcmUuCg=="
+      defer=""
+    ></script>
+    <script>
+      setInterval(() => {
+        window.parent.postMessage("user-browser-output-heartbeat", "*");
+      }, 500);
+    </script>
+  </head>
+  <body>
+    <div id="board">
+      <h1>Tic Tac Toe</h1>
+      <h2 id="game-heading" aria-live="polite">Player 1's Turn</h2>
+      <table role="grid">
+        <tbody>
+          <tr>
+            <td><button class="game-square"></button></td>
+            <td><button class="game-square"></button></td>
+            <td><button class="game-square"></button></td>
+          </tr>
+          <tr>
+            <td><button class="game-square"></button></td>
+            <td><button class="game-square"></button></td>
+            <td><button class="game-square"></button></td>
+          </tr>
+          <tr>
+            <td><button class="game-square"></button></td>
+            <td><button class="game-square"></button></td>
+            <td><button class="game-square"></button></td>
+          </tr>
+        </tbody>
+      </table>
+      <button id="restart-button">Restart Game</button>
+    </div>
+  </body>
+  <script>
+    (function () {
+      let currentPlayer = 0;
+      let numOfMoves = 0;
+      let rows;
+      let cols;
+      let daignol;
+      let antiDaignol;
+
+      const board = document.getElementById("board");
+      const heading = document.getElementById("game-heading");
+      const restartBtn = document.getElementById("restart-button");
+      const gridBtns =
+        Array.from(board.getElementsByClassName("game-square")) ?? [];
+
+      const updateBoardData = ([row, col]) => {
+        rows[row][currentPlayer] += 1;
+        cols[col][currentPlayer] += 1;
+
+        if (row === col) {
+          daignol[currentPlayer] += 1;
+        }
+
+        if (row + col === 2) {
+          antiDaignol[currentPlayer] += 1;
+        }
+        // console.log(rows, cols, [rows[row], cols[col]], currentPlayer);
+
+        return (
+          antiDaignol[currentPlayer] === 3 ||
+          daignol[currentPlayer] === 3 ||
+          rows[row][currentPlayer] === 3 ||
+          cols[col][currentPlayer] === 3
+        );
+      };
+
+      const disableBoard = (txt) => {
+        heading.textContent = txt;
+        board.removeEventListener("click", handleBoardClick);
+        gridBtns.forEach((btn) => {
+          btn.disabled = true;
+        });
+        board.disabled = true;
+        restartBtn.style.display = "block";
+      };
+
+      const handleBoardClick = (e) => {
+        const target = e.target;
+        const isActiveGameSquare =
+          target.className.includes("game-square") && !target.disabled;
+        if (!isActiveGameSquare) {
+          return;
+        }
+        numOfMoves += 1;
+        const isPlayerX = currentPlayer === 0;
+        const index = gridBtns.indexOf(target);
+        target.disabled = true;
+        target.textContent = isPlayerX ? "X" : "0";
+        const pos = [Math.floor(index / 3), index % 3];
+        if (updateBoardData(pos)) {
+          disableBoard(`Player ${currentPlayer + 1} Won!`);
+          return;
+        }
+        if (numOfMoves === 9) {
+          disableBoard("Tie Game!");
+          return;
+        }
+        currentPlayer = isPlayerX ? 1 : 0;
+        heading.textContent = `Player ${currentPlayer + 1}'s Turn`;
+      };
+
+      const startGame = () => {
+        rows = new Array(3).fill().map(() => ({ "0": 0, "1": 0 }));
+        cols = new Array(3).fill().map(() => ({ "0": 0, "1": 0 }));
+        daignol = { "0": 0, "1": 0 };
+        antiDaignol = { "0": 0, "1": 0 };
+        gridBtns.forEach((btn) => {
+          btn.disabled = false;
+          btn.textContent = "";
+        });
+        currentPlayer = 0;
+        numOfMoves = 0;
+        heading.textContent = `Player ${currentPlayer + 1}'s Turn`;
+        board.addEventListener("click", handleBoardClick);
+        restartBtn.style.display = "none";
+      };
+
+      startGame();
+
+      restartBtn.addEventListener("click", startGame);
+    })();
+  </script>
+</html>

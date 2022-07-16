@@ -1,0 +1,156 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Expected Output</title>
+    <style>
+      #stopwatch {
+        display: grid;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background-color: grey;
+        color: white;
+        text-align: center;
+        grid-column-gap: 12px;
+        align-content: center;
+        justify-content: center;
+        grid-template-areas:
+          "header header header"
+          "timer timer timer"
+          "start stop reset";
+      }
+
+      h1 {
+        margin: -20px 0 0 0;
+        grid-area: header;
+      }
+
+      button {
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        cursor: default;
+      }
+
+      #start-button {
+        grid-area: start;
+      }
+
+      #stop-button {
+        grid-area: stop;
+      }
+
+      #reset-button {
+        grid-area: reset;
+      }
+
+      #timer {
+        margin: 12px;
+        font-size: 24px;
+        font-weight: bold;
+        font-family: monospace;
+        grid-area: timer;
+      }
+
+      body {
+        scrollbar-width: thin;
+        scrollbar-color: #bcd transparent;
+      }
+
+      body::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      body::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+
+      body::-webkit-scrollbar-thumb {
+        background: #bcd;
+        border-radius: 3px;
+      }
+
+      body::-webkit-scrollbar-corner {
+        background-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stopwatch">
+      <h1>Stopwatch</h1>
+      <div id="timer" role="timer">00:00:000</div>
+      <button id="start-button">Start</button>
+      <button id="stop-button" disabled="">Stop</button>
+      <button id="reset-button" disabled="">Reset</button>
+    </div>
+  </body>
+  <script>
+    (function () {
+      let timeOutId;
+      let lastStartedTime = null;
+      let lastStoppedTime = null;
+      let timeWaitedInStoppedState = 0;
+
+      const timer = document.getElementById("timer");
+      const startBtn = document.getElementById("start-button");
+      const stopBtn = document.getElementById("stop-button");
+      const resetBtn = document.getElementById("reset-button");
+
+      startBtn.addEventListener("click", startTimer);
+      stopBtn.addEventListener("click", stopTimer);
+      resetBtn.addEventListener("click", resetTimer);
+
+      function startTimer() {
+        startBtn.disabled = true;
+        resetBtn.disabled = true;
+        stopBtn.disabled = false;
+        if (lastStoppedTime !== null && lastStartedTime !== null) {
+          timeWaitedInStoppedState += lastStartedTime - lastStoppedTime;
+        }
+        lastStartedTime = Date.now();
+        timeOutId = setInterval(updateTime, 10);
+      }
+
+      function updateTime() {
+        const currentTime =
+          Date.now() - (lastStartedTime + timeWaitedInStoppedState);
+        requestAnimationFrame(() => {
+          timer.textContent = getDisplayTime(currentTime);
+        });
+      }
+
+      function stopTimer() {
+        startBtn.disabled = false;
+        resetBtn.disabled = false;
+        stopBtn.disabled = true;
+        lastStoppedTime = Date.now();
+        clearInterval(timeOutId);
+      }
+      function resetTimer() {
+        startBtn.disabled = false;
+        resetBtn.disabled = true;
+        stopBtn.disabled = true;
+
+        lastStartedTime = null;
+        lastStoppedTime = null;
+        timeWaitedInStoppedState = 0;
+        clearInterval(timeOutId);
+        requestAnimationFrame(() => {
+          timer.textContent = "00:00:000";
+        });
+      }
+
+      function getDisplayTime(currentTime) {
+        const milliseconds = String(currentTime % 1000).padStart(3, "0");
+        currentTime = Math.floor(currentTime / 1000);
+        const seconds = String(currentTime % 60).padStart(2, "0");
+        currentTime = Math.floor(currentTime / 60);
+        const minutes = String(currentTime).padStart(2, "0");
+        return `${minutes}:${seconds}:${milliseconds}`;
+      }
+    })();
+  </script>
+</html>

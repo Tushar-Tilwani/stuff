@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Testimonials</title>
+    <style>
+      body {
+        background-color: grey;
+        color: white;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      #testimonial-container {
+        width: 75ch;
+        height: 75vh;
+        overflow-y: scroll;
+        margin: auto;
+        padding: 10px;
+        border-radius: 12px;
+        background-color: #001119;
+      }
+
+      .testimonial {
+        font-size: 18px;
+        margin: 16px;
+        padding: 10px;
+        border-top: 4px solid #11967e;
+        border-radius: 8px;
+        background-color: #00557f;
+      }
+
+      body {
+        scrollbar-width: thin;
+        scrollbar-color: #bcd transparent;
+      }
+
+      body::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      body::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+
+      body::-webkit-scrollbar-thumb {
+        background: #bcd;
+        border-radius: 3px;
+      }
+
+      body::-webkit-scrollbar-corner {
+        background-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Testimonials</h1>
+    <div id="testimonial-container"></div>
+  </body>
+  <script>
+    const API_BASE_URL = "https://www.algoexpert.io/api/testimonials";
+    let limit = 10;
+    let after = 0;
+
+    // Write your code here.
+
+    const getMoreData = async (params) => {
+      const queryParams = new URLSearchParams(params).toString();
+      const res = await fetch(`${API_BASE_URL}?${queryParams}`, {
+        mode: "no-cors",
+      });
+      const data = await res;
+      return data;
+    };
+
+    const renderMoreData = async ({ limit }) => {
+      const data = await getMoreData({ limit });
+      console.log("data", data);
+      return data.testimonials
+        .map((testimonial) => {
+          const p = document.createElement("p");
+          p.setAttribute("class", "testimonial");
+          p.textContent = testimonial;
+          return p;
+        })
+        .reduce((fragment, p) => {
+          fragment.appendChild(p);
+          return fragment;
+        }, new DocumentFragment());
+    };
+
+    const myDiv = document.getElementById("testimonial-container");
+    myDiv.addEventListener("scroll", () => {
+      if (myDiv.offsetHeight + myDiv.scrollTop >= myDiv.scrollHeight) {
+        console.log("scrolled to bottom");
+      }
+    });
+
+    renderMoreData(myDiv);
+  </script>
+</html>

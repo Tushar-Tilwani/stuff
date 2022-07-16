@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Testimonials</title>
+    <style>
+      body {
+        background-color: grey;
+        color: white;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      #testimonial-container {
+        width: 75ch;
+        height: 75vh;
+        overflow-y: scroll;
+        margin: auto;
+        padding: 10px;
+        border-radius: 12px;
+        background-color: #001119;
+      }
+
+      .testimonial {
+        font-size: 18px;
+        margin: 16px;
+        padding: 10px;
+        border-top: 4px solid #11967e;
+        border-radius: 8px;
+        background-color: #00557f;
+      }
+
+      body {
+        scrollbar-width: thin;
+        scrollbar-color: #bcd transparent;
+      }
+
+      body::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      body::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+
+      body::-webkit-scrollbar-thumb {
+        background: #bcd;
+        border-radius: 3px;
+      }
+
+      body::-webkit-scrollbar-corner {
+        background-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Testimonials</h1>
+    <div id="testimonial-container"></div>
+  </body>
+  <script>
+    const API_BASE_URL = "https://www.algoexpert.io/api/testimonials";
+    const pagesize = 5;
+    let currentPage = 1;
+    let after = undefined;
+    let loading = false;
+    let hasNextPage = false;
+
+    const createParaElement = ({ id, message }) => {
+      const p = document.createElement("p");
+      p.setAttribute("class", "testimonial");
+      p.setAttribute("data-id", id);
+      p.textContent = message;
+      return p;
+    };
+
+    const addToFragment = (fragment, p) => {
+      fragment.appendChild(p);
+      return fragment;
+    };
+
+    const getMoreData = async (params) => {
+      const queryParams = new URLSearchParams(params).toString();
+      const res = await fetch(`${API_BASE_URL}?${queryParams}`);
+      const data = await res.json();
+      return data;
+    };
+
+    const getFragment = async (params) => {
+      const { testimonials, hasNext } = await getMoreData(params);
+      if (testimonials.length === 0) {
+        return document.createDocumentFragment();
+      }
+      after = testimonials[testimonials.length - 1].id;
+      hasNextPage = hasNext;
+      return testimonials
+        .map(createParaElement)
+        .reduce(addToFragment, document.createDocumentFragment());
+    };
+
+    const appendMoreTestimonials = async () => {
+      const params = !!after ? { limit: pagesize, after } : { limit: pagesize };
+      try {
+        loading = true;
+        const fragment = await getFragment(params);
+        testimonialContainer.appendChild(fragment);
+        loading = false;
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    const handleScroll = () => {
+      if (
+        testimonialContainer.offsetHeight + testimonialContainer.scrollTop >=
+          testimonialContainer.scrollHeight &&
+        !loading &&
+        hasNextPage
+      ) {
+        appendMoreTestimonials();
+      }
+    };
+
+    const testimonialContainer = document.getElementById(
+      "testimonial-container"
+    );
+
+    testimonialContainer.addEventListener("scroll", handleScroll);
+    // Write your code here.
+    appendMoreTestimonials();
+  </script>
+</html>

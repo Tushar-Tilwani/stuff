@@ -1,0 +1,147 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Expected Output</title>
+    <style>
+      #stopwatch {
+        display: grid;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background-color: grey;
+        color: white;
+        text-align: center;
+        grid-column-gap: 12px;
+        align-content: center;
+        justify-content: center;
+        grid-template-areas:
+          "header header header"
+          "timer timer timer"
+          "start stop reset";
+      }
+
+      h1 {
+        margin: -20px 0 0 0;
+        grid-area: header;
+      }
+
+      button {
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        cursor: default;
+      }
+
+      #start-button {
+        grid-area: start;
+      }
+
+      #stop-button {
+        grid-area: stop;
+      }
+
+      #reset-button {
+        grid-area: reset;
+      }
+
+      #timer {
+        margin: 12px;
+        font-size: 24px;
+        font-weight: bold;
+        font-family: monospace;
+        grid-area: timer;
+      }
+
+      body {
+        scrollbar-width: thin;
+        scrollbar-color: #bcd transparent;
+      }
+
+      body::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      body::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+
+      body::-webkit-scrollbar-thumb {
+        background: #bcd;
+        border-radius: 3px;
+      }
+
+      body::-webkit-scrollbar-corner {
+        background-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stopwatch">
+      <h1>Stopwatch</h1>
+      <div id="timer" role="timer">00:00:000</div>
+      <button id="start-button">Start</button>
+      <button id="stop-button" disabled="">Stop</button>
+      <button id="reset-button" disabled="">Reset</button>
+    </div>
+  </body>
+  <script>
+    (function () {
+      let timeOutId = null;
+      let baseTime = 0;
+      let stoppedTimeQuantity = 0;
+      let lastStoppedTimestamp = 0;
+
+      const timer = document.getElementById("timer");
+      const startBtn = document.getElementById("start-button");
+      const stopBtn = document.getElementById("stop-button");
+      const resetBtn = document.getElementById("reset-button");
+
+      startBtn.addEventListener("click", () => {
+        startBtn.setAttribute("disabled", "");
+        resetBtn.setAttribute("disabled", "");
+        stopBtn.removeAttribute("disabled");
+        if (baseTime === 0) {
+          baseTime = Date.now();
+        } else {
+          stoppedTimeQuantity += Date.now() - lastStoppedTimestamp;
+        }
+        const ellaspedTime = baseTime + stoppedTimeQuantity;
+        clearInterval(timeOutId);
+        timeOutId = setInterval(() => {
+          const currentTime = Date.now() - ellaspedTime;
+          timer.textContent = getDisplayTime(currentTime);
+        }, 1);
+      });
+
+      stopBtn.addEventListener("click", () => {
+        stopBtn.setAttribute("disabled", "");
+        resetBtn.removeAttribute("disabled");
+        startBtn.removeAttribute("disabled");
+        clearInterval(timeOutId);
+        lastStoppedTimestamp = Date.now();
+      });
+
+      resetBtn.addEventListener("click", () => {
+        resetBtn.setAttribute("disabled", "");
+        stopBtn.setAttribute("disabled", "");
+        startBtn.removeAttribute("disabled");
+        timer.textContent = "00:00:000";
+        lastStoppedTimestamp = 0;
+        baseTime = 0;
+        stoppedTimeQuantity = 0;
+      });
+
+      const getDisplayTime = (currentTime) => {
+        const milliseconds = String(currentTime % 1000).padStart(3, "0");
+        currentTime = Math.floor(currentTime / 1000);
+        const seconds = String(currentTime % 60).padStart(2, "0");
+        currentTime = Math.floor(currentTime / 60);
+        const minutes = String(currentTime).padStart(2, "0");
+        return `${minutes}:${seconds}:${milliseconds}`;
+      };
+    })();
+  </script>
+</html>

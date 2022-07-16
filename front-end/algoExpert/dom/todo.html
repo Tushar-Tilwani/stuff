@@ -1,0 +1,176 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Browser Output</title>
+    <style>
+      div {
+        width: 70vw;
+        background-color: grey;
+        color: white;
+        padding: 12px;
+        border-radius: 12px;
+        margin: auto;
+        text-align: center;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 24px auto;
+      }
+
+      li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 12px;
+        border: 2px solid black;
+        background-color: #00557f;
+        border-radius: 5px;
+        margin: 5px;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+
+      h2 {
+        margin-right: 24px;
+      }
+
+      input {
+        font-size: 24px;
+        padding: 8px 8px;
+        outline: none;
+        width: 50%;
+      }
+
+      #add-button {
+        font-size: 24px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background-color: lightblue;
+        transition: 0.5s;
+        cursor: pointer;
+      }
+
+      #add-button:disabled {
+        background-color: revert;
+        cursor: default;
+      }
+
+      .wrapper {
+        width: 70vw;
+        margin: auto;
+        text-align: center;
+        background: grey;
+        color: white;
+      }
+
+      .delete-button {
+        background: none;
+        color: white;
+        border: 1px solid transparent;
+        border-radius: 100%;
+        height: 24px;
+        width: 24px;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 0;
+        transition: 0.5s;
+        cursor: pointer;
+      }
+
+      .delete-button:hover {
+        border-color: white;
+        transform: scale(1.2);
+      }
+
+      body {
+        scrollbar-width: thin;
+        scrollbar-color: #bcd transparent;
+      }
+
+      body::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      body::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+
+      body::-webkit-scrollbar-thumb {
+        background: #bcd;
+        border-radius: 3px;
+      }
+
+      body::-webkit-scrollbar-corner {
+        background-color: transparent;
+      }
+    </style>
+
+    <script
+      src="data:text/javascript;charset=UTF-8;base64,Ly8gV3JpdGUgeW91ciBjb2RlIGhlcmUuCihmdW5jdGlvbiAoKSB7CiAgY29uc3QgdG9kb0lucHV0ID0gZG9jdW1lbnQuYWRkRXZlbnkKCgogIAp9KSgp"
+      defer=""
+    ></script>
+    <script>
+      setInterval(() => {
+        window.parent.postMessage("user-browser-output-heartbeat", "*");
+      }, 500);
+    </script>
+  </head>
+  <body>
+    <div id="wrapper">
+      <h1>Todo List</h1>
+      <input id="todo-input" type="text" placeholder="Add a todo..." />
+      <button id="add-button" disabled="">Add</button>
+      <ul id="todo-list"></ul>
+    </div>
+    <script>
+      // Write your code here.
+      (function () {
+        const todoInput = document.getElementById("todo-input");
+        const addButton = document.getElementById("add-button");
+        const todoList = document.getElementById("todo-list");
+
+        const handleKeypress = (e) => {
+          addButton.disabled = !e.target.value?.trim();
+        };
+
+        const handleAddBtnClick = () => {
+          addItem({ value: todoInput.value });
+          todoInput.value = "";
+          addButton.disabled = true;
+        };
+
+        function addItem({ value, id }) {
+          const li = document.createElement("li");
+
+          const h2 = document.createElement("h2");
+          h2.textContent = todoInput.value;
+
+          const btn = document.createElement("button");
+          btn.className = "delete-button";
+          btn.textContent = "X";
+
+          li.appendChild(h2);
+          li.appendChild(btn);
+          todoList.appendChild(li);
+        }
+
+        const handleListClick = (e) => {
+          const classname = e.target.className;
+          if (classname?.includes("delete-button")) {
+            // remove li
+            e.target.parentNode.remove();
+          }
+        };
+
+        todoInput.addEventListener("keyup", handleKeypress);
+        addButton.addEventListener("click", handleAddBtnClick);
+        todoList.addEventListener("click", handleListClick);
+      })();
+    </script>
+  </body>
+</html>
