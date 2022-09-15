@@ -50,16 +50,16 @@ function getNeighbors(grid, row, col) {
   const neighbors = [];
 
   row + 1 < grid.length &&
-    grid[row + 1][col] === 0 &&
+    grid[row + 1][col] === 1 &&
     neighbors.push([row + 1, col]);
 
-  row - 1 >= 0 && grid[row - 1][col] === 0 && neighbors.push([row - 1, col]);
+  row - 1 >= 0 && grid[row - 1][col] === 1 && neighbors.push([row - 1, col]);
 
   col + 1 < grid[0].length &&
-    grid[row][col + 1] === 0 &&
+    grid[row][col + 1] === 1 &&
     neighbors.push([row, col + 1]);
 
-  col - 1 >= 0 && grid[row][col - 1] === 0 && neighbors.push([row, col - 1]);
+  col - 1 >= 0 && grid[row][col - 1] === 1 && neighbors.push([row, col - 1]);
 
   return neighbors;
 }
