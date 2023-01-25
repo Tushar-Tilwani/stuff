@@ -1,109 +1,176 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useReducer } from "react";
 
 const ROWS = 6;
 const COLS = 7;
+const WIN_COUNT = 4;
 
-function checkWin(board, row, col) {
-  const minRow = Math.min(0, row - 4);
-  const maxRow = Math.max(ROWS - 1, row + 4);
+const getInitialState = () => {
+  return {
+    board: new Array(COLS).fill().map(() => new Array(ROWS).fill(null)),
+    didWin: false,
+    currentPlayer: 2,
+    colIndicies: new Array(COLS).fill(ROWS),
+    noOfMoves: 0,
+  };
+};
 
-  let count = board[col][minRow] === null ? 0 : 1;
-  for (let i = minRow + 1; i <= maxRow; i++) {
-    if (board[col][i] === null) {
+const checkDidWin = ({ board, currentPlayer, colIndex, rowIndex }) => {
+  let count = 0;
+
+  // Column Check
+  for (let i = 0; i < COLS; i++) {
+    if (board[i][rowIndex] === currentPlayer) {
+      count++;
+    } else {
       count = 0;
-      continue;
     }
-    if (board[col][i] !== board[col][i - 1]) {
-      count = 1;
-      continue;
-    }
-    count++;
-    if (count === 4) {
-      return board[col][i];
+    if (count === WIN_COUNT) {
+      return true;
     }
   }
 
-  const minCol = Math.min(0, col - 4);
-  const maxCol = Math.max(COLS - 1, col + 4);
-
-  count = board[minCol][row] === null ? 0 : 1;
-  for (let i = minCol + 1; i <= maxCol; i++) {
-    if (board[i][row] === null) {
+  // Row Check
+  count = 0;
+  for (let i = 0; i < ROWS; i++) {
+    if (board[colIndex][i] === currentPlayer) {
+      count++;
+    } else {
       count = 0;
-      continue;
     }
-    if (board[i][row] !== board[i - 1][row]) {
-      count = 1;
-      continue;
-    }
-    count++;
-    if (count === 4) {
-      return board[i][row];
+    if (count === WIN_COUNT) {
+      return true;
     }
   }
 
-  return null;
-}
+  // Diagonal Check
+  count = 0;
+  const dist = Math.min(colIndex, rowIndex);
+  let rowDaig = rowIndex - dist;
+  let colDaig = colIndex - dist;
+  // console.log("-------------", colIndex, rowIndex);
+  while (rowDaig < ROWS && colDaig < COLS) {
+    // console.log([rowDaig, colDaig], board[rowDaig][colDaig]);
+    if (board[colDaig][rowDaig] === currentPlayer) {
+      count++;
+    } else {
+      count = 0;
+    }
+    if (count === WIN_COUNT) {
+      return true;
+    }
+    rowDaig++;
+    colDaig++;
+  }
 
-const Cell = ({ player }) => (
-  <div className="tile">
-    {player && <div className={`player player-${player}`}></div>}
-  </div>
-);
+  // Anti Diagonal Check
+  count = 0;
+  const sum = rowIndex + colIndex;
+  let rowAdaig = 0;
+  let colAdaig = sum;
+  while (rowAdaig <= sum && colAdaig >= 0) {
+    if (colAdaig < COLS && board[colAdaig][rowAdaig] === currentPlayer) {
+      count++;
+    }
 
-const Column = ({ row, index: colIndex, onClick }) => (
-  <div
-    className="column"
-    data-index={colIndex}
-    onClick={() => onClick(colIndex)}
-  >
-    {row.map((player, rowIndex) => {
-      return <Cell key={`${rowIndex}${colIndex}`} player={player} />;
-    })}
-  </div>
-);
+    if (count === WIN_COUNT) {
+      return true;
+    }
+
+    colAdaig--;
+    rowAdaig++;
+  }
+
+  return false;
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "MOVE":
+      const { colIndex } = action;
+      const {
+        board,
+        currentPlayer: previousPlayer,
+        colIndicies,
+        didWin,
+        noOfMoves,
+      } = state;
+      const currentPlayer = previousPlayer === 1 ? 2 : 1;
+      if (colIndicies[colIndex] <= 0 || didWin || noOfMoves === COLS * ROWS) {
+        return state;
+      }
+      colIndicies[colIndex] -= 1;
+      board[colIndex][colIndicies[colIndex]] = currentPlayer;
+      return {
+        board: [...board],
+        colIndicies: [...colIndicies],
+        currentPlayer,
+        noOfMoves: noOfMoves + 1,
+        didWin: checkDidWin({
+          currentPlayer,
+          board,
+          colIndex,
+          rowIndex: colIndicies[colIndex],
+        }),
+      };
+    case "RESET":
+      return getInitialState();
+    default:
+      return state;
+  }
+};
+
+const Tile = (props) => {
+  const { tile } = props;
+  if (!tile) {
+    return <div className="tile" />;
+  }
+  return (
+    <div className="tile">
+      <div className={`player player-${tile}`}></div>
+    </div>
+  );
+};
+
+const Column = (props) => {
+  const { cols, colIndex, handleClick } = props;
+  return (
+    <div className="column" onClick={() => handleClick({ colIndex })}>
+      {cols.map((tile, rowIndex) => (
+        <Tile tile={tile} key={`${colIndex}:${rowIndex}`} />
+      ))}
+    </div>
+  );
+};
 
 export default function ConnectFour() {
-  // Write your code here.
-  const [board, setBoard] = useState(
-    new Array(COLS).fill().map(() => new Array(ROWS).fill(null))
+  const [state, dispatch] = useReducer(reducer, getInitialState());
+  const { board, didWin, currentPlayer, noOfMoves } = state;
+  const handleMove = useCallback(
+    ({ colIndex }) => {
+      dispatch({ type: "MOVE", colIndex });
+    },
+    [dispatch]
   );
-  const [lastCols, setLastCols] = useState(new Array(COLS).fill(ROWS - 1));
-  const [player, setPlayer] = useState(1);
-  const [won, setWon] = useState(null);
 
-  const handleClick = (col) => {
-    if (won !== null) {
-      return;
-    }
-    const row = lastCols[col];
-    if (row < 0) {
-      return;
-    }
-    board[col][row] = player;
-    lastCols[col] -= 1;
-    setBoard([...board]);
-    setLastCols([...lastCols]);
-    setPlayer(player === 1 ? 2 : 1);
-    setWon(checkWin(board, row, col));
-  };
-
-  const handleRestart = useCallback(() => {
-    setBoard(new Array(COLS).fill().map(() => new Array(ROWS).fill(null)));
-    setLastCols(new Array(COLS).fill(ROWS - 1));
-    setPlayer(1);
-    setWon(null);
-  }, [setLastCols, setPlayer, setWon, setBoard]);
-
+  const handleReset = useCallback(() => {
+    dispatch({ type: "RESET" });
+  }, [dispatch]);
   return (
     <>
-      {won && <h1>Player {won} won!</h1>}
-      <div class="board">
-        {board.map((row, index) => (
-          <Column row={row} index={index} onClick={handleClick} />
+      {didWin && <h1>Player {currentPlayer} Wins</h1>}
+      <div className="board">
+        {board.map((cols, colIndex) => (
+          <Column
+            cols={cols}
+            colIndex={colIndex}
+            key={`${colIndex}`}
+            handleClick={handleMove}
+          />
         ))}
       </div>
-      {won && <button onClick={handleRestart}>Restart</button>}
+      {(didWin || noOfMoves === COLS * ROWS) && (
+        <button onClick={handleReset}>Restart</button>
+      )}
     </>
   );
 }
