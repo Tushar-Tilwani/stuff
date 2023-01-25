@@ -1,0 +1,43 @@
+.cell {
+  margin: auto 0;
+}
+
+.longCell {
+  margin: auto 0;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+$expandBgColor: #f5f8fa;
+
+.baseRow {
+  cursor: pointer;
+}
+
+.baseRowExpanded {
+  background: $expandBgColor;
+}
+
+.expandedRow {
+  background: $expandBgColor;
+  padding: 8px 8px 8px 30px;
+}
+
+.dataRow {
+  display: flex;
+}
+
+.dataKey {
+  flex: 1 0 70px;
+  word-break: break-word;
+}
+
+.dataValue {
+  flex: 2 1 50%;
+  word-break: break-word;
+}
+
+.scrollContainer {
+  overflow-y: auto;
+}
