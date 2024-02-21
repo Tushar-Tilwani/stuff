@@ -11,18 +11,18 @@
  * };
  */
 
-const MAX = Math.pow(2, 31) - 1;
-
 /**
  * @param {ArrayReader} reader
  * @param {number} target
  * @return {number}
  */
 const search = function (reader, target) {
-  let start = 0;
-  // Could be 20,000 as well since range is give and there are no duplicate values
-  // Or you could run a 2*n serach to find an end
-  let end = MAX;
+  let end = 1;
+  // Target will always be lower than 2^31 - 1
+  while (target > reader.get(end)) {
+    end = 2 * end;
+  }
+  let start = Math.floor(end / 2);
 
   while (start <= end) {
     const mid = Math.floor((end - start) / 2) + start;
@@ -30,7 +30,7 @@ const search = function (reader, target) {
     if (midValue === target) {
       return mid;
     }
-    if (midValue === MAX || target < midValue) {
+    if (target < midValue) {
       end = mid - 1;
     } else {
       start = mid + 1;
