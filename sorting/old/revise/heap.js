@@ -5,13 +5,20 @@ function swap(arr, i, j) {
 }
 
 class MinHeap {
-  constructor() {
+  constructor(arr) {
     this.arr = [null];
+    for (const value of arr) {
+      this.add(value);
+    }
   }
 
   add(val) {
     this.arr.push(val);
     this.bubbleUp();
+  }
+
+  size() {
+    return this.arr.length - 1;
   }
 
   bubbleUp() {
@@ -80,7 +87,12 @@ class MinHeap {
   }
 }
 
-const minHeap = new MinHeap();
+
+
+
+
+
+const minHeap = new MinHeap([1,2,33,4,55,6,7]);
 minHeap.add(6);
 minHeap.add(3);
 minHeap.add(1);
@@ -97,6 +109,7 @@ minHeap.add(-1);
 // console.log(minHeap.extractMin());
 // console.log(minHeap);
 
+console.log(minHeap.size());
 let val;
 // console.log(minHeap);
 while ((val = minHeap.extractMin()) !== null) {

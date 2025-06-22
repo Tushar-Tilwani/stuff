@@ -1,7 +1,7 @@
 // Children of n => 2n , 2n+1
 // parent of n => Math.floor(n/2);
 class Heap {
-  constructor(arr, compartor) {
+  constructor(arr = [], compartor) {
     this.arr = [null];
     this.compartor = compartor;
     for (const val of arr) {
@@ -86,11 +86,11 @@ class Heap {
 
 
 const heap = new Heap();
-heap.insert(3);
-heap.insert(8);
-heap.insert(5);
-heap.insert(1);
-heap.insert(4);
+heap.push(3);
+heap.push(8);
+heap.push(5);
+heap.push(1);
+heap.push(4);
 
 console.log(heap.arr);
 
