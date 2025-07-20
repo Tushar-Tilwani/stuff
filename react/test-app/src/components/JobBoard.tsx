@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 type Props = { url?: string };
 export type Job = {
   id: string;
@@ -16,11 +16,7 @@ async function fetchData<T>(url: string) {
   return data;
 }
 
-// async function useFetchJobs(pageNumber: number) {
-    
-// }
-
-const JobBoard: React.FC<Props> = () => {
+const useGetJobBoard = () => {
   const [jobIds, setJobIds] = useState<string[]>([]);
   const [pageNumber, setPageNumber] = useState<number>(0);
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -47,7 +43,15 @@ const JobBoard: React.FC<Props> = () => {
     fetchJobs();
   }, [pageNumber]);
 
-  console.log(jobs.length, jobs);
+  const loadMoreJobs = useCallback(() => {
+    setPageNumber((pageNumber) => pageNumber + 1);
+  }, [setPageNumber]);
+
+  return { jobs, loadMoreJobs };
+};
+
+const JobBoard: React.FC<Props> = () => {
+  const { jobs, loadMoreJobs } = useGetJobBoard();
 
   return (
     <h1>
@@ -60,7 +64,7 @@ const JobBoard: React.FC<Props> = () => {
           );
         })}
       </div>
-      <button onClick={() => setPageNumber((prev) => prev + 1)}>Load More Jobs</button>
+      <button onClick={loadMoreJobs}>Load More Jobs</button>
     </h1>
   );
 };

@@ -1,0 +1,4 @@
+How to implement observability on high scability pages?
+
+How to create a observability 
+
