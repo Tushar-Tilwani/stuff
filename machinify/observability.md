@@ -196,28 +196,6 @@ sequenceDiagram
 
 ---
 
-## ⚛️ How to Use in a React Component
-
-```javascript
-import { useEffect } from 'react';
-import { initializeLogger } from 'otel-logger';
-
-export default function SomeRandomComponent() {
-  useEffect(() => {
-    // Ideally logger will be in context
-    const logger = initializeLogger();
-
-    fetch('/api/some-endpoint')
-      .then(res => res.ok || Promise.reject('API failed'))
-      .catch(err => logger.error(err));
-  }, []);
-
-  return <>Random Component</>;
-}
-```
-
----
-
 ## 🛡️ Final Safeguard: Server-Side Inlining
 
 If the **client bundle fails**, observability may break.
@@ -226,6 +204,7 @@ If the **client bundle fails**, observability may break.
 
 ```html
 <script>
+ export const loggerSymbol = Symbol('logger');
   class Logger {
     constructor() {
       this.interimLogs = [];
@@ -249,11 +228,23 @@ If the **client bundle fails**, observability may break.
   }
 
   const logger = new Logger();
+  window[loggerSymbol] = this.logger;
   window.addEventListener("error", (event) => logger.error(event));
   window.addEventListener("unhandledrejection", (event) => logger.error(event));
+
+  export const getLogger() {
+    return window[loggerSymbol];
+  }
 </script>
 
-<script src="/client-bundle.js"></script>
+<script src="/client-bundle.js">
+
+// Inside client bundle we could. But thius
+  const logger = getLogger();
+</script>
+
+ 
+
 ```
 
 > 🧬 This ensures **basic logging** works even if your app fails to load, ideal for **SSR (server-side rendering)**.
