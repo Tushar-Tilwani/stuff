@@ -204,6 +204,7 @@ import { initializeLogger } from 'otel-logger';
 
 export default function SomeRandomComponent() {
   useEffect(() => {
+    // Ideally logger will be in context
     const logger = initializeLogger();
 
     fetch('/api/some-endpoint')
