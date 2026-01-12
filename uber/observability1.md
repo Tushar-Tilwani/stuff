@@ -40,6 +40,52 @@ At the same time, we had to work within real constraints: heavy OTEL SDKs, CSP a
 
 ---
 
+
+### High Level Architecture
+
+
+Most critical frontend failures occur before or during application load.
+To ensure observability in these scenarios, a minimal logging bootstrap is inlined during server-side rendering.
+
+```mermaid
+sequenceDiagram
+  participant HTML
+  participant Inline as InlineBootstrap
+  participant App as ClientBundle
+  participant OTLP as OTLPPipeline
+
+  HTML->>Inline: Inline script executes
+  Inline->>Inline: Attach error listeners
+  Inline->>Inline: Buffer errors
+  App--x Inline: Client bundle fails to load
+  Inline->>OTLP: Emit buffered errors
+```
+
+This guarantees visibility even when the application never fully initializes.
+
+---
+
+OpenTelemetry provides standardization and extensibility, but introduces significant bundle weight in the browser.
+To protect performance budgets, OTEL is loaded lazily.
+
+```mermaid
+sequenceDiagram
+  participant UI as Browser
+  participant Proxy as ProxyLogger
+  participant Lazy as LazyOTELChunk
+  participant OTLP as OTLPPipeline
+
+  UI->>Proxy: Error occurs
+  Proxy->>Proxy: Buffer error
+  Proxy->>Lazy: Dynamic import
+  Lazy->>Proxy: OTEL initialized
+  Proxy->>Lazy: Flush buffered logs
+  Lazy->>OTLP: Export logs
+```
+
+---
+
+
 ### The Core Architecture
 
 The most important architectural decision was to split the system into **three cooperating artifacts**, each built separately for clear ownership and performance reasons, but designed to work together as a single runtime.
@@ -49,6 +95,7 @@ These artifacts are not independent systems. They are intentionally cohesive, ea
 ---
 
 #### Inline RUM Bootstrap (SSR-Injected)
+This is the code that gets stringified and injected by RumInliner.
 
 The first piece is a small inline bundle that is injected into the document head during server-side rendering.
 
