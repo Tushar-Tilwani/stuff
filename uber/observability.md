@@ -1,6 +1,6 @@
 # Real User Monitoring (RUM) Platform: Design & Architecture
 
-This platform provides standardized frontend observability as a default capability of the web platform. It scales across more than **120 applications**, covering roughly **95% of UI surfaces**, including high-traffic customer-facing pages and internal tools. The architecture ensures that critical failures—especially those occurring during SSR or hydration—are captured without impacting browser performance.
+This platform provides standardized frontend observability as a default capability of the web platform. It scales across more than **120 applications**, covering roughly **95% of UI surfaces**, including high-traffic customer-facing pages and internal tools. The main goal was to ensure that critical failures, especially those happening during server side rendering or hydration, are captured without hurting browser performance.
 
 ---
 
