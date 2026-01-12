@@ -63,7 +63,7 @@ class Heap {
   }
 }
 
-const heap = new Heap();
+const heap = new Heap1();
 heap.insert(3);
 heap.insert(8);
 heap.insert(5);

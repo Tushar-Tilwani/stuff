@@ -1,0 +1,30 @@
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     val: number
+ *     left: TreeNode | null
+ *     right: TreeNode | null
+ *     constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *         this.val = (val===undefined ? 0 : val)
+ *         this.left = (left===undefined ? null : left)
+ *         this.right = (right===undefined ? null : right)
+ *     }
+ * }
+ */
+
+function getAllElements(
+  root1: TreeNode | null,
+  root2: TreeNode | null
+): number[] {
+  return [...dfs(root1, []), ...dfs(root2, [])].sort((a, b) => a - b);
+}
+
+function dfs(node: TreeNode | null, result: number[]) {
+  if (!node) {
+    return result;
+  }
+  dfs(node.left, result);
+  result.push(node.val);
+  dfs(node.right, result);
+  return result;
+}

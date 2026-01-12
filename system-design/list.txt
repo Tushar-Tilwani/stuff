@@ -1,0 +1,11 @@
+Slack
+https://excalidraw.com/#json=W66wiIeWmLd_Tbi3s01Lm,jec_2qm9-MxfcLZNn_hpUA
+https://excalidraw.com/#json=-TZJzcN75oxZMANC5DTZN,3kxUf_RX2EtMnJXgVVyT-g
+
+
+Notifcation System
+https://excalidraw.com/#json=ylvtox1sYm5rO4Fo5lMtM,zqzJ66Ha7sMCpw8ZzIISIg
+
+Pinintrest Kafka Logging
+https://excalidraw.com/#json=g4ZVJvhTc0-UGiP6nP7-a,HIRozM0uf05RQ4QCf2cb-Q
+ 

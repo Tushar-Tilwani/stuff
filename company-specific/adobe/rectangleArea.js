@@ -92,7 +92,7 @@ const MOD = Math.pow(10, 9) + 7;
  * @return {number}
  */
 var rectangleArea = function (rectangles) {
-  const heap = new Heap([], (a, b) => a[0] > b[0]);
+  const heap = new Heap1([], (a, b) => a[0] > b[0]);
   for (const [x1, y1, x2, y2] of rectangles) {
     const height = Math.abs(y2 - y1) % MOD;
     

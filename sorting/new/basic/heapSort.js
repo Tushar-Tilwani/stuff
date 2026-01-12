@@ -79,7 +79,7 @@ function randomInRange(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-const heap = new Heap();
+const heap = new Heap1();
 const n = 6;
 for (let i = 0; i < n; i++) {
   heap.push(randomInRange(1, 700));

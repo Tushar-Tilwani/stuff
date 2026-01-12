@@ -1,0 +1,24 @@
+// disagreement
+// chat Architecture
+// Data - inculde metrics : Chat CPU usage 30% - 20% 
+// Scope
+// What I did 
+
+// To increase scope mention timeline
+// Situation: 
+// Task: 
+// Action:
+// Result:
+
+
+// Conflicting expectations 
+// Npm Issues
+
+// Conflict
+
+
+
+
+
+I was tasked to look into fix some bugs and  of the touch to zoom feature on picture panel. I quikcly releaizes 
+it was due to old 

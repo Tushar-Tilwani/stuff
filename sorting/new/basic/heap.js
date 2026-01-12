@@ -85,7 +85,7 @@ class Heap {
 }
 
 
-const heap = new Heap();
+const heap = new Heap1();
 heap.push(3);
 heap.push(8);
 heap.push(5);
@@ -103,7 +103,7 @@ const n = 6;
 for (let i = 0; i < n; i++) {
   arr.push(randomInRange(1, 700));
 }
-const minHeap = new Heap(arr, (a, b) => b < a);
+const minHeap = new Heap1(arr, (a, b) => b < a);
 console.log(minHeap);
 let sorted = [];
 for (let i = 0; i < n; i++) {
