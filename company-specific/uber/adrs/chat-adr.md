@@ -1,306 +1,252 @@
-# eBay Unified Chat Platform
+Below is a **clean, presentation-ready rewrite** in **proper Markdown**, with **correct Mermaid syntax**, clear sectioning, and Uber-appropriate tone.
+I fixed formatting issues, normalized headings, tightened language, and ensured every Mermaid block will render correctly.
 
-**Staff-level Frontend Architecture**
-
-## Scope
-
-**Platform capability usable by all teams within eBay**
-(Web: React + Marko, Native clients)
-
-Initial consumers:
-
-* eBay Live
-* eBay Support
-* eBay Auction / Transactions
+You can drop this directly into a doc, Miro, or HackerRank.
 
 ---
 
-## Problem Statement
-
-> Create a **single chat platform** that any eBay team can integrate with **minimal effort**, while:
-
-* Avoiding **vendor lock-in**
-* Supporting **indepen                                                                                                                                                                                                                                                                          /*//a/dent UI & backend A/B tests**
-* Enabling **context-aware chat**
-* Meeting **strict latency targets**
-* Working across **React, Marko, and Native**
+````md
+# Real User Monitoring (RUM) Platform  
+## Design, Architecture, and Organizational Impact
 
 ---
 
-## Key Constraints
+## 1. Executive Summary
 
-* Vendor required short-term (time to market)
-* Native apps impose long SDK support windows
-* Teams operate independently with different stacks
-* Experiments must compose (UI × backend)
+This project addressed a systemic gap in frontend observability across the organization.
+
+While backend services already emitted OpenTelemetry (OTEL) signals with mature ingestion pipelines and dashboards, frontend applications lacked a reliable and standardized way to capture real user failures. This created blind spots during incidents, duplicated effort across teams, and led to inconsistent observability quality.
+
+I designed and led a client-side RUM platform that:
+
+- Standardized frontend observability on OpenTelemetry
+- Minimized browser performance impact
+- Remained reliable even when applications failed to load
+- Leveraged existing backend observability infrastructure
+
+Adoption scaled from three initial teams to over **120 applications**, covering approximately **95% of all UI applications**, including both external customer-facing surfaces and internal tools.
 
 ---
 
-## Vendor-First Architecture (Rejected)
+## 2. Problem Statement
+
+### Observed Issues
+
+- Fragmented frontend logging implementations across teams  
+- No consistent schema or lifecycle management  
+- Critical failures during SSR and hydration were invisible  
+- Frontend observability disconnected from backend OTEL pipelines  
+- High integration friction discouraged consistent adoption  
+
+### Organizational Impact
+
+These gaps slowed incident response, increased operational load for SREs, and prevented end-to-end visibility across the stack, directly impacting reliability and developer productivity.
+
+---
+
+## 3. Goals and Constraints
+
+### Goals
+
+- Make observability a default outcome, not a per-team responsibility  
+- Capture failures even when applications fail to load  
+- Minimize performance impact in the browser  
+- Standardize on OpenTelemetry for long-term extensibility  
+- Enable organization-wide adoption with minimal configuration  
+
+### Constraints
+
+- Browser bundle size and performance budgets  
+- CSP and SSR execution environments  
+- Heavy OpenTelemetry JavaScript SDK  
+- Metrics cardinality and cost considerations  
+- Legacy build systems (Lasso, Webpack 3)  
+
+---
+
+## 4. High-Level Platform Architecture
 
 ```mermaid
 flowchart LR
-  UI[Web / Native UI] -- WebSocket --> VG[Vendor Gateway]
-  VG --> VB[Vendor Backend]
-```
-
-**Issues**
-
-* UI tightly coupled to vendor SDK & hooks
-* No clean UI / backend experiment boundary
-* Native SDK lock-in (2+ years)
-* Poor Marko + plain JS support
-
----
-
-## Final Architecture (Platform Model)
-
-```mermaid
-flowchart LR
-  subgraph Clients
-    R[React]
-    M[Marko]
-    N[Native]
+  subgraph ORG["Organization scale"]
+    Apps["120+ UI applications"]
   end
 
-  subgraph Host
-    A[Chat Adapter\n(host-owned)]
+  subgraph BROWSER["Browser runtime"]
+    Inline["SSR inline bootstrap"]
+    Runtime["RUM client runtime"]
+    Lazy["Lazy-loaded OTEL"]
   end
 
-  subgraph eBay
-    G[eBay Chat Gateway]
-    S[eBay Chat Service]
+  subgraph PLATFORM["Shared observability platform"]
+    OTLP["OTLP pipelines"]
+    Dashboards["Sherlock dashboards"]
   end
 
-  subgraph Vendor
-    V[Stream Backend]
-  end
-
-  R --> A
-  M --> A
-  N --> A
-
-  A --> G --> S --> V
-```
-
-**Core idea:**
-👉 UI never talks to vendor
-👉 UI talks to a **stable adapter contract**
-👉 Vendor becomes an implementation detail
+  Apps --> Inline
+  Inline --> Runtime
+  Runtime --> Lazy
+  Lazy --> OTLP
+  OTLP --> Dashboards
+````
 
 ---
 
-## Frontend Platform Boundary
+## 5. Reliability Under Failure: SSR Inline Logging
 
-```mermaid
-flowchart TB
-  subgraph Host App
-    H[Surface Integration]
-    AD[Chat Adapter\nImplementation]
-  end
-
-  subgraph Chat Platform
-    P[ChatProvider]
-    UI[Chat UI\n(React / Marko)]
-    ST[Chat Store]
-    CT[Shared Types & Contracts]
-  end
-
-  H --> AD --> P
-  P --> UI
-  P --> ST
-  ST --> UI
-  CT --- UI
-  CT --- AD
-```
-
-**Ownership**
-
-* **Platform owns UI + contracts**
-* **Host owns adapter**
-* **Backend is fully abstracted**
-
----
-
-## Chat Adapter (Core Abstraction)
-
-> This is the *only* required integration point.
-
-```tsx
-<ChatProvider adapter={adapter}>
-  <ChatUI />
-</ChatProvider>
-```
-
-### Adapter Contract (Highlighted)
-
-```ts
-export interface ChatAdapter {
-  listMessages(input: {
-    beforeId?: string;
-    limit?: number;
-  }): Promise<{
-    messages: ChatMessage[];
-    hasMore: boolean;
-  }>;
-
-  sendMessage(input: {
-    text: string;
-    localId: string;
-  }): Promise<ChatMessage>;
-
-  subscribe(
-    onEvent: (event: ChatEvent) => void
-  ): () => void;
-}
-```
-
-**Why this works**
-
-* Minimal surface area
-* Transport-agnostic (REST, WS, GraphQL)
-* Framework-agnostic (React, Marko, Native)
-* Stable across vendor swaps
-
----
-
-## A/B Testing (UI × Backend, Order-Independent)
-
-```mermaid
-flowchart LR
-  UI[UI Variant\nA / B]
-  FX[Experiment Resolver]
-  AD[Adapter]
-
-  GW[eBay Gateway]
-  RT[Backend Routing]
-  B1[Chat Backend v1]
-  B2[Chat Backend v2]
-
-  UI --> FX --> AD --> GW --> RT
-  RT --> B1
-  RT --> B2
-```
-
-* UI experiments resolved client-side
-* Backend experiments resolved at gateway/service
-* No cross-coupling or combinatorial explosion
-
----
-
-## Context-Aware Chat (eBay Intelligence)
-
-```mermaid
-flowchart TB
-  UI --> AD --> GW --> CS[eBay Chat Service]
-  CS --> ORCH[Context Orchestrator]
-  ORCH --> CAT[Catalog / Pricing]
-  ORCH --> AI[Context Engine]
-  ORCH --> CS
-```
-
-* UI renders messages only
-* Context logic fully backend-owned
-* Reusable across Live, Support, Auction
-
----
-
-## Multi-Framework Strategy
-
-```mermaid
-flowchart LR
-  C[Chat Core\n(State + Contracts)]
-  R[React Renderer]
-  M[Marko Wrapper]
-  N[Native Client]
-
-  C --> R
-  C --> M
-  C --> N
-```
-
-* One contract
-* Multiple renderers
-* No vendor SDK leakage into UI
-
----
-
-## Performance Targets
-
-* **P50 server RTT < 200ms**
-* **Client perceived RTT < 800ms**
-
-Achieved via:
-
-* Gateway normalization
-* Optimistic UI (store-level)
-* Small initial payloads
-* Long-lived connections where needed
-
----
-
-## Trade-offs
-
-**Pros**
-
-* Vendor lock-in removed
-* Clean experimentation boundaries
-* Cheap onboarding for new teams
-* Incremental path to in-house backend
-
-**Cons**
-
-* Adapter implementation required per surface
-* Platform ownership (gateway + service)
-* Contract discipline required
-
----
-
-## Why This Is Staff-Level
-
-* Designed as a **platform**, not a feature
-* Explicit boundaries for ownership & evolution
-* Optimizes for **change velocity**, not just delivery
-* Solves experimentation, migration, and scale together
-
----
-
-# Appendix
-
-## A. Message Send Lifecycle
+Most critical frontend failures occur before or during application load.
+To ensure observability in these scenarios, a minimal logging bootstrap is inlined during server-side rendering.
 
 ```mermaid
 sequenceDiagram
-  participant UI
-  participant Adapter
-  participant Gateway
-  participant Service
-  participant Vendor
+  participant HTML
+  participant Inline as InlineBootstrap
+  participant App as ClientBundle
+  participant OTLP as OTLPPipeline
 
-  UI->>Adapter: sendMessage
-  Adapter->>Gateway: POST /messages
-  Gateway->>Service
-  Service->>Vendor
-  Vendor-->>Service
-  Service-->>Adapter
-  Adapter-->>UI
+  HTML->>Inline: Inline script executes
+  Inline->>Inline: Attach error listeners
+  Inline->>Inline: Buffer errors
+  App--x Inline: Client bundle fails to load
+  Inline->>OTLP: Emit buffered errors
+```
+
+This guarantees visibility even when the application never fully initializes.
+
+---
+
+## 6. Performance Trade-Off: Lazy Loading OpenTelemetry
+
+OpenTelemetry provides standardization and extensibility, but introduces significant bundle weight in the browser.
+To protect performance budgets, OTEL is loaded lazily.
+
+```mermaid
+sequenceDiagram
+  participant UI as Browser
+  participant Proxy as ProxyLogger
+  participant Lazy as LazyOTELChunk
+  participant OTLP as OTLPPipeline
+
+  UI->>Proxy: Error occurs
+  Proxy->>Proxy: Buffer error
+  Proxy->>Lazy: Dynamic import
+  Lazy->>Proxy: OTEL initialized
+  Proxy->>Lazy: Flush buffered logs
+  Lazy->>OTLP: Export logs
+```
+
+This preserves Core Web Vitals while ensuring no loss of critical signals.
+
+---
+
+## 7. Metrics Architecture
+
+Metrics are implemented using OpenTelemetry’s `MeterProvider` with explicit lifecycle management to control cost and cardinality.
+
+```mermaid
+flowchart TD
+  App["App code"] --> Meter["OTEL meter"]
+  Meter --> Reader["Periodic metric reader"]
+  Reader --> Exporter["OTLP exporter"]
+  Exporter --> OTLP["OTLP pipeline"]
+```
+
+### Resource Model
+
+```mermaid
+flowchart LR
+  Resource["Resource"]
+  Service["service.name"]
+  Session["session.id"]
+  Page["page.id"]
+  Browser["Low-cardinality browser attributes"]
+
+  Resource --> Service
+  Resource --> Session
+  Resource --> Page
+  Resource --> Browser
 ```
 
 ---
 
-## B. Subscription Flow
+## 8. Adoption Strategy
+
+### Initial Validation
+
+* Started with three teams within my organization
+* Selected **ViewItem**, one of the largest and most business-critical UI surfaces
+* Validated the approach on the ViewItem Light Page under strict performance constraints
+
+This phase de-risked the architecture and demonstrated feasibility at scale.
+
+---
+
+## 9. Organization-Wide Scale
 
 ```mermaid
-sequenceDiagram
-  participant Provider
-  participant Adapter
-  participant Gateway
-  participant Service
-
-  Provider->>Adapter: subscribe
-  Adapter->>Gateway: open socket
-  Service-->>Gateway: events
-  Gateway-->>Adapter
-  Adapter-->>Provider
+flowchart LR
+  Server["Server defaults"] --> Inliner["RUM inliner props"]
+  Inliner --> Provider["RumContextProvider"]
+  Provider --> Teams["Product teams"]
 ```
 
+### Adoption Outcome
+
+* Expanded from three teams to over **120 applications**
+* Approximately **95% coverage** of all UI applications
+* Included both external customer-facing applications and internal tools
+
+The RUM platform became the standard integration path for frontend observability.
+
+---
+
+## 10. Cross-Functional Leadership
+
+* Partnered early with SRE teams to align on OTEL semantics and operational expectations
+* Leveraged existing backend OTEL pipelines and Sherlock dashboards
+* Avoided building parallel observability systems, accelerating time-to-value
+
+---
+
+## 11. Enablement and Sustainability
+
+* Delivered internal talks and platform onboarding sessions
+* Held regular office hours to support complex and legacy integrations
+* Actively supported applications using Lasso and Webpack 3
+
+### Knowledge Scaling
+
+* Trained internal GPT models on RUM code, docs, and integration guides
+* Enabled self-service onboarding for new applications
+* Reduced ongoing support needs as adoption scaled
+
+---
+
+## 12. Extensibility and Future Work
+
+* Resource model and lifecycle hooks designed to support client-side tracing
+* Tracing intentionally deferred to prioritize stability and adoption
+* Architecture prepared for future expansion without breaking changes
+
+---
+
+## 13. Impact Summary
+
+| Dimension             | Outcome                                  |
+| --------------------- | ---------------------------------------- |
+| Scope                 | 120+ applications (~95% of UI)           |
+| Reliability           | Error capture during application failure |
+| Performance           | Lazy-loaded OTEL                         |
+| Cost Control          | Low-cardinality metrics                  |
+| Productivity          | No-config integration                    |
+| Organizational Impact | Default frontend observability platform  |
+
+---
+
+## 14. Conclusion
+
+This work transformed frontend observability from fragmented, ad hoc implementations into a standardized, scalable platform. By leveraging existing infrastructure, prioritizing reliability and performance, and focusing on developer experience, observability became a default capability across nearly all UI applications in the organization.
+
+```
+
+---
