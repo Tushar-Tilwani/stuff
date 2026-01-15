@@ -1,8 +1,10 @@
 # Project: Standardized Real User Monitoring (RUM) Platform
 
-![miro](appendex/rum_miro.png)
 
 This platform provides **observability-as-a-service** for the enterprise web stack. It currently powers **120+ applications**, covering **95% of the company's UI surfaces**.
+
+![miro](appendex/rum_miro.png)
+
 
 
 ### 🚩 The Challenge
@@ -87,13 +89,14 @@ window.addEventListener("load", () => {
 
 ---
 
+
 ## 📐 The Solution: Standardized OTEL Pipelines
 
-By adopting the **OpenTelemetry (OTEL)** standard, we aligned the frontend with modern infrastructure.
+By adopting the **OpenTelemetry (OTEL)** standard, we have aligned our frontend observability with modern infrastructure practices. This move transitions us away from proprietary lock-in toward a flexible, industry-standard architecture.
 
-- 🌍 **Universal Format:** Data is emitted in a vendor-neutral schema.
-- 🔌 **Pluggable Backends:** Easily switch between Grafana, Datadog, or Honeycomb.
-- 🤝 **Full-Stack Visibility:** We can now link a slow frontend click to a specific backend database query.
+* 🌍 **Universal Format:** Data is emitted using a vendor-neutral schema, ensuring long-term compatibility.
+* 🔌 **Pluggable Backends:** We can seamlessly route data to Grafana, Datadog, Honeycomb, or internal collectors without changing application code.
+* 🤝 **Full-Stack Context:** [Not Implemented yet] Distributed tracing allows us to link a single frontend interaction directly to its corresponding backend microservices and database queries.
 
 ### Framework Integration: Zero-Bundle Inlining
 
@@ -110,7 +113,7 @@ Marko has supported pure server components, allowing us to inject critical monit
 ```marko
 <html>
   <head>
-    <rum-inliner />
+    <rum-inliner /> /** This a Pure Server Component **/
   </head>
   <body>
     <app-content />
@@ -195,7 +198,7 @@ A minimal, zero-dependency script inlined in the `<head>`.
     const RUM_SYMBOL = Symbol.for("ebay.rum");
     const payload = document.currentScript?.dataset?.inlinepayload;
     const rumConfig = payload ? JSON.parse(payload) : {};
-    const buffer = [];
+    const buffer = []; // Need to be capped so it does not grow unbounded
     let otelLogger = null;
 
     const logger = {
@@ -276,14 +279,12 @@ export const useRumContext = () => {
 
 ---
 
-## 📈 Impact & Results
-
-| Metric          | Result                                                                             |
-| --------------- | ---------------------------------------------------------------------------------- |
-| **Visibility**  | Captured failures in the "dead zone" that were previously 100% invisible.          |
-| **Performance** | Zero regression in **First Input Delay (FID)** by deferring SDK load to idle time. |
-| **MTTR**        | SREs now identify root causes in minutes via cross-stack trace correlation.        |
-| **Velocity**    | Replaced multi-day instrumentation tasks with a platform default.                  |
+| Metric | Business & Technical Outcome |
+| --- | --- |
+| **Visibility** | **Eliminated the "Dead Zone":** Captured critical startup failures and early-page-load errors that were previously 100% invisible to our monitoring stack. |
+| **Performance** | **Zero Runtime Overhead:** Maintained stable **First Input Delay (FID)** and Core Web Vitals by intelligently deferring the heavy SDK load to browser idle time. |
+| **MTTR** | **Rapid Resolution:** SREs now identify root causes in minutes rather than hours, utilizing enriched stack traces and unified cross-stack alerting. |
+| **Velocity** | **Frictionless Onboarding:** Eliminated manual, multi-day instrumentation tasks by providing observability as a "zero-config" platform default. |
 
 ---
 
