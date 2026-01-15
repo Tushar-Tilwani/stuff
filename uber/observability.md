@@ -20,83 +20,11 @@ Our goal was to move to a **Platform Primitive**: every app inherits observabili
 
 We monitor three primary categories of telemetry:
 
-* ❌ **Logs:** Unhandled exceptions and promise rejections.
-* 📊 **Metrics (Meters):** Quantitative data like page load speed and memory usage.
-* 🔗 **Traces:** Connecting frontend actions to backend **OpenTelemetry (OTEL)** spans.
+* **Logs:** Unhandled exceptions and promise rejections.
+* **Metrics (Meters):** Quantitative data like page load speed and memory usage.
+* **Traces:** Connecting frontend actions to backend **OpenTelemetry (OTEL)** spans.
 
 ---
-
-## 🧰 The "Naive" Approach (And why it fails)
-
-In a basic setup, a developer might manually listen for events. This is what we wanted to move away from:
-
-### 1. Manual Error Logging
-
-```javascript
-class Logger {
-  log(error) {
-    // 📡 Immediate network call - unoptimized
-    fetch('/telemetry/errors', { method: 'POST', body: JSON.stringify(error) });
-  }
-}
-
-const logger = new Logger();
-
-// Listen for runtime crashes
-window.addEventListener("error", (e) => logger.log(e));
-window.addEventListener("unhandledrejection", (e) => logger.log(e));
-
-```
-
-### 2. Manual Performance Metering
-
-```javascript
-class Meter {
-  histogram({ name, value }) {
-    // Used for timing/distribution (e.g., Latency)
-    fetch('/metrics', { method: 'POST', body: JSON.stringify({ name, value, type: 'histogram' })});
-  }
-  counter({ name, value }) {
-    // Used for cumulative sums (e.g., Page Views)
-    fetch('/metrics', { method: 'POST', body: JSON.stringify({ name, value, type: 'counter' })});
-  }
-  gauge({ name, value }) {
-    // Used for a snapshot in time (e.g., Memory Usage)
-    fetch('/metrics', { method: 'POST', body: JSON.stringify({ name, value, type: 'gauge' })});
-  }
-}
-
-const meter = new Meter();
-
-window.addEventListener("load", () => {
-  // Counter: Tracking a discrete event
-  meter.counter({ name: "page-loaded", value: 1 });
-
-  // Histogram: Tracking timing/latency
-  meter.histogram({ name: "load-latency", value: performance.timing.loadEventEnd - performance.timing.navigationStart });
-
-  // Gauge: Tracking current state of resources
-  meter.gauge({ name: "heap-size", value: performance.memory?.totalJSHeapSize });
-});
-```
-### ❌ Why this doesn't scale:
-
-* 📉 **Performance:** Fires a global `fetch` request for every single event, which can hurt the user experience.
-* ❓ **No Context:** Lacks metadata like Browser version, User Region, or Trace IDs.
-* 🏗 **Custom Backend:** Requires an in-house backend to parse proprietary data formats instead of using industry standards.
-
----
-
-## 📐 The Solution: Standardized OTEL Pipelines
-
-By adopting the **OpenTelemetry (OTEL)** standard, we aligned the frontend with modern infrastructure.
-
-* 🌍 **Universal Format:** Data is emitted in a vendor-neutral schema.
-* 🔌 **Pluggable Backends:** Easily switch between Grafana, Datadog, or Honeycomb.
-* 🤝 **Full-Stack Visibility:** We can now link a slow frontend click to a specific backend database query.
-
----
-
 ## 🧰 The "Naive" Approach (And why it fails)
 
 In a basic setup, a developer might manually listen for events. We moved away from this because it lacks batching, context, and standardization.
@@ -135,21 +63,56 @@ class Meter {
 
 ### ❌ Why this doesn't scale:
 
-* 📉 **Performance:** Fires a global `fetch` request for every single event, hurting UX.
-* ❓ **No Context:** Lacks metadata like Browser version, User Region, or Trace IDs.
-* 🏗 **Custom Backend:** Requires an in-house backend to parse proprietary data formats instead of industry standards.
+* **Performance:** Fires a global `fetch` request for every single event, hurting bandwidth.
+* **No Context:** Lacks metadata like Browser version, User Region, or Trace IDs.
+* **Custom Backend:** Requires an in-house backend to parse proprietary data formats instead of industry standards.
 
 ---
 
 ## 📐 The Solution: Standardized OTEL Pipelines
 
-By adopting **OpenTelemetry (OTEL)**, we aligned the frontend with modern infrastructure: **Universal Format**, **Pluggable Backends** (Grafana/Honeycomb), and **Full-Stack Visibility** (linking clicks to DB queries).
+By adopting the **OpenTelemetry (OTEL)** standard, we aligned the frontend with modern infrastructure.
 
-### "Zero-Setup" Implementation
+* 🌍 **Universal Format:** Data is emitted in a vendor-neutral schema.
+* 🔌 **Pluggable Backends:** Easily switch between Grafana, Datadog, or Honeycomb.
+* 🤝 **Full-Stack Visibility:** We can now link a slow frontend click to a specific backend database query.
 
-The platform is **environment-aware**, automatically extracting `serviceName` and `environment` from server context.
+### Framework Integration: Zero-Bundle Inlining
 
-**Example: React (Remix/SSR)**
+To achieve "observability by default," the platform utilizes **Server-Only Components** (such as Marko JS Server Components or React Server Components).
+
+The key technical advantage here is that the `<rum-inliner />` component **does not add to the client-side JavaScript bundle**. Instead, it executes purely during the SSR phase to inject the "Sentinel" bootstrap script directly into the HTML stream as a string.
+
+Furthermore, since it is a server component, it is **environment-aware**, automatically extracting `serviceName` and `environment` from the server context (such as environment variables or `package.json`) without exposing that logic to the client.
+
+#### Example: Marko JS
+
+Marko has supported pure server components, allowing us to inject critical monitoring logic without the overhead of a hydrated component.
+
+```marko
+<html>
+  <head>
+    <rum-inliner /> 
+  </head>
+  <body>
+    <app-content />
+  </body>
+</html>
+
+```
+
+#### Why this matters:
+
+* **Performance:** The browser receives the monitoring instructions in the first chunk of HTML, well before the main application bundle is even requested.
+* **Reliability:** By using a server-side primitive, we ensure that the "Sentinel" is present even if the client-side hydration fails or the main JS bundle is blocked by a network error.
+* **Context Extraction:** Because the component runs on the server, it has direct access to the deployment environment. It can resolve the service version or data center location and bake that metadata directly into the inlined configuration payload.
+* **Portability:** This pattern is framework-agnostic; while shown in Marko above, the same logic applies to **React Server Components (RSC)**, where the component logic stays on the server and only the resulting `<script>` tag is sent to the browser.
+
+
+
+#### Example: Remix/React SSR
+
+This is what majority of React SSR apps use currently 
 
 ```jsx
 import { getRumServerProps } from '@ebay/react-rum/server';
