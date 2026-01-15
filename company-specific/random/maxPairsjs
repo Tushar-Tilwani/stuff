@@ -1,0 +1,29 @@
+function maxPairs(skillLevel, minDiff) {
+  // Write your code here
+  const sortedSkillLevel = [...skillLevel].sort((a, b) => a - b);
+  let left = 0;
+  let right = 0;
+  let count = 0;
+  let indexSet = new Set();
+   console.log('sortedSkillLevel', sortedSkillLevel , minDiff)
+  while (right < sortedSkillLevel.length && left < sortedSkillLevel.length) {
+    if (Math.abs(sortedSkillLevel[left] - sortedSkillLevel[right]) < minDiff) {
+      right++;
+      continue;
+    }
+    if (indexSet.has(left)) {
+      left++;
+      continue;
+    }
+    if (indexSet.has(right)) {
+      right++;
+      continue;
+    }
+    indexSet.add(left);
+    indexSet.add(right);
+    count++;
+    left++;
+    right++;
+  }
+  return count;
+}

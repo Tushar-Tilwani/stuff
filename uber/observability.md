@@ -186,10 +186,11 @@ flowchart LR
     Backend --> Dashboards[SRE Dashboards]
 
 ```
+### Impact and Operational Results
 
-### Impact and Performance
+* **Reliability:** Captured failures during the "dead zone" of application initialization that were previously 100% invisible.
+* **Performance:** Achieved universal coverage with zero regression in First Input Delay (FID) by deferring SDK initialization to idle time.
+* **MTTR Reduction:** By unifying schemas and enabling cross-stack correlation, SREs can now identify the root cause of frontend-impacting incidents in minutes rather than hours.
+* **Developer Velocity:** We turned a complex, multi-day instrumentation task into a zero-click platform default.
 
-* **Coverage:** Captured failures that occur even if the client bundle never loads or if hydration fails.
-* **Performance:** Zero impact on initial page load metrics (LCP/FID) by utilizing the buffering and lazy-loading pattern.
-* **Consistency:** Unified error semantics across 120+ apps, allowing SREs to correlate frontend failures with backend traces for faster debugging.
-
+---
