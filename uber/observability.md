@@ -98,6 +98,8 @@ By adopting the **OpenTelemetry (OTEL)** standard, we have aligned our frontend 
 * 🔌 **Pluggable Backends:** We can seamlessly route data to Grafana, Datadog, Honeycomb, or internal collectors without changing application code.
 * 🤝 **Full-Stack Context:** [Not Implemented yet] Distributed tracing allows us to link a single frontend interaction directly to its corresponding backend microservices and database queries.
 
+[Sample OTEL Payload](https://jsonblob.com/019bc07f-6519-7b0d-b674-4c37e9298102)
+
 ### Framework Integration: Zero-Bundle Inlining
 
 To achieve "observability by default," the platform utilizes **Server-Only Components** (such as Marko JS Server Components or React Server Components).
