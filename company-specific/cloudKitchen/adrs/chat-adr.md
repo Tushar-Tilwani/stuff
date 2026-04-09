@@ -125,11 +125,8 @@ We introduced a **Chat Adapter** as the central abstraction.
 +------│-----------│-----------+
        │           │
        ▼           ▼
-   [Redis]     [Database]
+  Vendor        Legacy Backend
 
-              │
-              ▼
-        Vendor / Legacy Backend
 ```
 
 ---
