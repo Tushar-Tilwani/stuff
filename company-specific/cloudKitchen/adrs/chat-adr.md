@@ -91,7 +91,9 @@ We introduced a **Chat Adapter** as the central abstraction.
 
 ---
 
-## 🏗️ High-Level Architecture (Miro-style)
+## 🏗️ High-Level Architecture 
+
+![Architecture](IMG_3656.jpg)
 
 ```
 +----------------------+
